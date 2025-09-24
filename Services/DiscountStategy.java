@@ -1,4 +1,4 @@
-package PricingServices;
+package Services;
 
 
 import DataModels.Order;

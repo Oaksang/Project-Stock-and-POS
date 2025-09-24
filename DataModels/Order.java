@@ -31,20 +31,31 @@ public class Order {
         return items;
     }
     public void addItem(OrderItem item) {
-        if (item == null) throw new RuntimeException("item is unknow");
+        if (item == null) throw new RuntimeException("item is unknown");
         items.add(item);
     }
-     public void removeItem(int index) {
+    public void removeItem(int index) {
         items.remove(index);
     }
-
-     public double calculateSubtotal() {
-        return 0.0;
-     }
-
-     public void addItem(Product item1, int i) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addItem'");
-     }
     
+    public double getSubtotal() {
+        return items.stream().mapToDouble(OrderItem::getTotal).sum();
+    }
+
+    // Test Order class
+    public static void main(String[] args) {
+        Product product1 = new Product("P001", "Laptop", 1200, 50);
+        Product product2 = new Product("P002", "Mouse", 25, 200);
+        OrderItem orderItem1 = new OrderItem(product1, 2, product1.price());
+        OrderItem orderItem2 = new OrderItem(product2, 3, product2.price());
+        List<OrderItem> itemList = List.of(orderItem1, orderItem2);
+        Order order = new Order("O001", LocalDateTime.now(), itemList);
+        System.out.println("Order ID: " + order.getOrderId());
+        System.out.println("Timestamp: " + order.getTimestamp());
+        System.out.println("Items:");
+        for (OrderItem item : order.getItems()) {
+            System.out.println("- " + item.getProduct().name() + " x" + item.getQuantity() + " @ " + item.getPrice() + " each, Total: " + item.getTotal());
+        }
+        System.out.println("Subtotal: " + order.getSubtotal());
+    }
 }

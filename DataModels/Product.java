@@ -33,9 +33,7 @@ public class Product {
     public int stock() {
         return stock;
     }
-    public double getPrice() {
-        return price;
-    }
+    
     public void setStock(int stock) {
         if (stock < 0) throw new RuntimeException("Stock should be >= 0");
         this.stock = stock;

@@ -8,7 +8,7 @@ public class OrderItem {
 
     public OrderItem(Product product, int quantity, double price) {
         if (product == null) 
-        throw new RuntimeException("product is unknow");
+        throw new RuntimeException("product is unknown");
         if (quantity < 1) 
         throw new RuntimeException("quantity need more than or equal 1");
         this.product = product;
@@ -31,5 +31,15 @@ public class OrderItem {
 
     public double getTotal() {
         return product.price() * quantity;
+    }
+
+    // Test OrderItem
+    public static void main(String[] args) {
+        Product product = new Product("P001", "Laptop", 1200, 50);
+        OrderItem orderItem = new OrderItem(product, 5, product.price());
+        System.out.println("Product: " + orderItem.getProduct().name());
+        System.out.println("Quantity: " + orderItem.getQuantity());
+        System.out.println("Price: " + orderItem.getPrice());
+        System.out.println("Total: " + orderItem.getTotal());
     }
 }
