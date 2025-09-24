@@ -7,7 +7,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 
-public class Jflame_dashboard_order extends JFrame {
+public class JFrame_dashboard_order extends JFrame {
 
     private DefaultTableModel cartTableModel;
     private JLabel subtotalLabel;
@@ -15,7 +15,7 @@ public class Jflame_dashboard_order extends JFrame {
     private JLabel totalLabel;
     private JTextField searchField; // ทำให้ searchField เป็นตัวแปรของคลาส
 
-    public Jflame_dashboard_order(){
+    public JFrame_dashboard_order(){
 
         setTitle("ระบบ POS ");
         setSize(1000, 750);
