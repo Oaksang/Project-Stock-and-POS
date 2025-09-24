@@ -78,11 +78,9 @@ public class add_inventory extends JFrame implements ActionListener{
         dispose();
      }else if(e.getSource()==add){
         //write file
-        new inventory();
         dispose();
      }
      else if(e.getSource()==back){
-        new inventory();
         dispose();
      }
     }

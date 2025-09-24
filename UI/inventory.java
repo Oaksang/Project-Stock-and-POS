@@ -192,14 +192,14 @@ public class inventory extends JFrame implements ActionListener{
             String select=(String)add_product.getSelectedItem();
             if(select=="add new product"){
                 new add2_inventory();
-                dispose();
+                //dispose();
             }else if(select=="add quantity product"){
                 new add_inventory();
-                dispose();
+                //dispose();
             }
         }else if(e.getSource()==remove){
                 new remove_inventory();
-                dispose();
+                //dispose();
         }else if(e.getSource()==inventory){
              if (check_p) {
                 home.setBounds(0, 0, 20, 20);

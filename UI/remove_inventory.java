@@ -78,11 +78,9 @@ public class remove_inventory extends JFrame implements ActionListener{
         dispose();
      }else if(e.getSource()==remove){
         //delete file
-        new inventory();
         dispose();
      }
      else if(e.getSource()==back){
-        new inventory();
         dispose();
      }
     }
