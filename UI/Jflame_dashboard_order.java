@@ -106,7 +106,6 @@ public class Jflame_dashboard_order extends JFrame {
         keypadPanel.setBackground(panelColor);
     
         JButton manualEnterButton = createStyledButton("Add Product", accentColor, Color.WHITE);
-        // *** แก้ไขตรงนี้: ดึงค่าจาก searchField แทนการใช้ JOptionPane ***
         manualEnterButton.addActionListener(e -> {
         String productID = searchField.getText().trim(); // ดึงค่าจากช่องค้นหา
         if (!productID.isEmpty()) {
