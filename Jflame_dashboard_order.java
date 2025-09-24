@@ -201,14 +201,11 @@ public class Jflame_dashboard_order extends JFrame {
         JButton cashButton = createStyledButton("Cash", accentColor, Color.WHITE);
         cashButton.addActionListener(e -> processPayment("Cash"));
         buttonPanel.add(cashButton);
+
+        JButton codeButton = createStyledButton("Use Code", accentColor, Color.WHITE);
+        codeButton.addActionListener(e -> processPayment("Use Code"));
+        buttonPanel.add(codeButton);
         
-        JButton creditCardButton = createStyledButton("Credit card", accentColor, Color.WHITE);
-        creditCardButton.addActionListener(e -> processPayment("Credit card"));
-        buttonPanel.add(creditCardButton);
-        
-        JButton othersButton = createStyledButton("Others", accentColor, Color.WHITE);
-        othersButton.addActionListener(e -> processPayment("Others"));
-        buttonPanel.add(othersButton);
         
         panel.add(summaryPanel, BorderLayout.NORTH);
         panel.add(buttonPanel, BorderLayout.CENTER);
