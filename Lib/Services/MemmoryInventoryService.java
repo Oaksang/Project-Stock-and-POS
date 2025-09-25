@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import DataModels.*;
-import Exception.*;
+import Exceptions.InvalidOperationException;
+import Exceptions.ProductNotFoundException;
 
 /**
  * เก็บสินค้าในหน่วยความจำด้วย ArrayList
@@ -176,5 +177,12 @@ public void increase(String sku, int qty)
         if (value == null) throw new IllegalArgumentException(name + " is required");
     }
     
+    @Override
+    public boolean hasSufficientStock(String sku, int quantity) throws ProductNotFoundException {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity must be non-negative");
+        }
+        return true;
+    }
 
 }
