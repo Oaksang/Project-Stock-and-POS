@@ -1,7 +1,8 @@
 package Services;
 import java.util.List;
 import DataModels.*;
-import Exception.*;
+import Exceptions.InvalidOperationException;
+import Exceptions.ProductNotFoundException;
 
 /**
  * จัดการสต็อก + ค้น/เรียง/เช็คของใกล้หมด 
@@ -31,4 +32,6 @@ public interface InventoryService {
 
     void decrease(String sku, int qty)
                 throws ProductNotFoundException, InvalidOperationException;
+    boolean hasSufficientStock(String sku, int quantity) throws ProductNotFoundException;
+
 }
