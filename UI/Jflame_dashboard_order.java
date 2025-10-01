@@ -531,7 +531,7 @@ private void applyDiscountCode(String code) {
         currentDiscount = 10.00;
         
         JOptionPane.showMessageDialog(this, 
-            "Discount code '" + code + "' applied successfully! (฿50.00 off)", 
+            "Discount code '" + code + "' applied successfully! (฿10.00 off)", 
             "Success", 
             JOptionPane.INFORMATION_MESSAGE);
             
