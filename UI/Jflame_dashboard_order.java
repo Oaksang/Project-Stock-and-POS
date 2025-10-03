@@ -7,6 +7,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import Services.PricingService;
+
 
 public class Jflame_dashboard_order extends JFrame {
 
@@ -20,6 +22,7 @@ public class Jflame_dashboard_order extends JFrame {
     private double currentDiscount = 0.0; // ตัวแปรเก็บส่วนลดปัจจุบัน
     private JLabel discountLabel; // Label สำหรับแสดงส่วนลด
     private JTable cartTable; // เพิ่ม: ตัวแปร JTable สำหรับตะกร้า
+    private PricingService pricingService = new PricingService();
 
     public Jflame_dashboard_order(){
 
@@ -104,10 +107,10 @@ public class Jflame_dashboard_order extends JFrame {
         // 2. สร้างตารางแสดงสินค้า (Product List Table)
         String[] productColumnNames = {"SKU", "Name", "Price"};
         productTableModel = new DefaultTableModel(productColumnNames, 0) {
-             @Override
-             public boolean isCellEditable(int row, int column) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
                  return false; // ห้ามแก้ไขข้อมูลในตารางสินค้า
-             }
+            }
         };
         JTable productTable = new JTable(productTableModel);
         productTable.setFillsViewportHeight(true);
@@ -401,7 +404,6 @@ private void updateTotals() {
         // คอลัมน์ใน cartTableModel: 0=List, 1=Quantity, 2=Total
         
         try {
-             // 💡 แก้ไข: ดัชนี 2 คือคอลัมน์ "Total"
              subtotal += (double) cartTableModel.getValueAt(i, 2); 
         } catch (ClassCastException | NullPointerException e) {
              System.err.println("Error reading total amount from row " + i + ". Data might not be a double. Value: " + cartTableModel.getValueAt(i, 2));
@@ -468,7 +470,6 @@ private void updateTotals() {
     private void loadProductsFromCSV() {
         // ใช้ ProductCSVReader ที่ผู้ใช้เตรียมไว้
         // NOTE: ต้องแน่ใจว่าคลาส DataModels และ ProductCSVReader มีอยู่ในโปรเจกต์
-        // (เราได้เพิ่ม DataModels.ProductCSVReader.java และ DataModels.Product.java ไว้ในโปรเจกต์แล้ว)
         DataModels.ProductCSVReader reader = new DataModels.ProductCSVReader();
         productList = reader.readProductsFromCSV(); // อ่านข้อมูลทั้งหมด
         
@@ -508,37 +509,33 @@ private void applyDiscountCode(String code) {
     // รีเซ็ตส่วนลดก่อน
     double oldDiscount = currentDiscount;
     currentDiscount = 0.0; // สมมติว่าโค้ดใหม่จะล้างโค้ดเก่าเสมอ
-
-    // ******************************************************
-    // PLACEHOLDER: ส่วนนี้คือ Logic การตรวจสอบโค้ดจริง
-    // ******************************************************
     
-    // โค้ดส่วนลดจำลอง (สามารถปรับเปลี่ยนได้ตามต้องการ):
-    if (code.equalsIgnoreCase("SALE20")) {
-        // โค้ดนี้ให้ส่วนลด 20% ของยอดรวม
-        double discountRate = 0.20;
-        currentDiscount = subtotal * discountRate;
-        
-        JOptionPane.showMessageDialog(this, 
-            "Discount code '" + code + "' applied successfully! (20% off on subtotal)", 
-            "Success", 
-            JOptionPane.INFORMATION_MESSAGE);
-            
-        updateTotals(); // อัปเดตยอดรวม
+    // 2. คำนวณส่วนลดโดยใช้ PricingService
+    double calculatedDiscount = pricingService.calDiscount(subtotal, code);
 
-    } else if (code.equalsIgnoreCase("TENOFF")) {
-        // โค้ดลด 10 บาท (ลดแบบตายตัว)
-        currentDiscount = 10.00;
+    if (calculatedDiscount > 0.0) {
+        // โค้ดส่วนลดถูกต้อง
+        currentDiscount = calculatedDiscount;
         
+        // ตรวจสอบชนิดของส่วนลดเพื่อแสดงข้อความที่เหมาะสม (อิงตาม logic ของ PricingService)
+        String discountMessage;
+        if (code.equalsIgnoreCase("SALE20")) {
+             discountMessage = " (20% off on subtotal)";
+        } else if (code.equalsIgnoreCase("TENOFF")) {
+             discountMessage = " (฿10.00 off)";
+        } else {
+             discountMessage = ""; // ใช้ในกรณีที่มีโค้ดอื่นๆ เพิ่มเติม
+        }
+
         JOptionPane.showMessageDialog(this, 
-            "Discount code '" + code + "' applied successfully! (฿10.00 off)", 
+            "Discount code '" + code + "' applied successfully!" + discountMessage, 
             "Success", 
             JOptionPane.INFORMATION_MESSAGE);
             
         updateTotals(); // อัปเดตยอดรวม
 
     } else {
-        // โค้ดไม่ถูกต้อง 
+        // โค้ดไม่ถูกต้อง (calDiscount คืนค่า 0.0)
         currentDiscount = oldDiscount; // คืนค่าส่วนลดเดิม
         JOptionPane.showMessageDialog(this, 
             "Discount code '" + code + "' is invalid or expired.", 
