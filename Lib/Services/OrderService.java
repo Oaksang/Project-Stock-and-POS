@@ -55,8 +55,6 @@ public class OrderService {
 
         // 4. สร้างและบันทึก Order
         String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
-        
-        // *** แก้ไข Order.java constructor ที่รับ LocalDate ให้เป็น LocalDateTime ***
         Order newOrder = new Order(orderId, LocalDateTime.now(), items);
         
         // 5. สร้างและบันทึก SaleRecord (ข้อมูลการจ่ายเงินสำเร็จ)
