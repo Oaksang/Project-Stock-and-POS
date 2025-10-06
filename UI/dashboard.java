@@ -121,6 +121,7 @@ public class dashboard extends JFrame implements ActionListener{
    ham.addActionListener(this);
    home.addActionListener(this);
    inventory.addActionListener(this);
+   logout.addActionListener(this);
    Pos.addActionListener(this);
    p.add(p_top);
    this.setGlassPane(p);
@@ -160,13 +161,14 @@ public class dashboard extends JFrame implements ActionListener{
             cp.revalidate();
             cp.repaint();
     } else if(e.getSource()==logout){
-      //go to login (Atom)
+        new loginpanel();
+        dispose();
     } else if(e.getSource()==inventory){
         new inventory();
         dispose();
     }else if(e.getSource()==Pos){
-         new Jflame_dashboard_order();
-         dispose();
+      new Jflame_dashboard_order();
+      dispose();
     } else if(e.getSource()==home){
       if (check_p) {
                 home.setBounds(0, 0, 20, 20);

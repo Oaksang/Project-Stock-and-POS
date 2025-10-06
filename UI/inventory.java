@@ -145,13 +145,14 @@ public class inventory extends JFrame implements ActionListener{
     ham.addActionListener(this);
     home.addActionListener(this);
     inventory.addActionListener(this);
-    Pos.addActionListener(this);
     remove.addActionListener(this);
     add.addActionListener(this);
-   p.add(p_top);
-   this.setGlassPane(p);
-   p.setVisible(false);
-   p.setOpaque(false);
+    logout.addActionListener(this);
+    Pos.addActionListener(this);
+    p.add(p_top);
+    this.setGlassPane(p);
+    p.setVisible(false);
+    p.setOpaque(false);
     }
     public void Finally(){
     this.setSize(550,650);
@@ -214,10 +215,12 @@ public class inventory extends JFrame implements ActionListener{
             }
             cp.revalidate();
             cp.repaint();
-        }
-        else if(e.getSource()==Pos){
-         new Jflame_dashboard_order();
-         dispose();
+        } else if(e.getSource()==logout){
+            new loginpanel();
+            dispose();
+        } else if(e.getSource()==Pos){
+            new Jflame_dashboard_order();
+          dispose();
         }
     }
 }

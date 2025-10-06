@@ -12,7 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import Services.PricingService;
 
 
-public class Jflame_dashboard_order extends JFrame implements ActionListener {
+public class Jflame_dashboard_order extends JFrame {
 
     private DefaultTableModel cartTableModel;
     private DefaultTableModel productTableModel; // เพิ่ม: Model สำหรับตารางสินค้า
@@ -52,24 +52,22 @@ public class Jflame_dashboard_order extends JFrame implements ActionListener {
         
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
-        JMenuItem exitItem = new JMenuItem("Dashboard");
-        JMenuItem inventoryItem = new JMenuItem("Inventory");
+        JMenuItem exitItem = new JMenuItem("Go to Dashboard");
+        JMenuItem inventoryItem = new JMenuItem("Go to Inventory");
+        exitItem.addActionListener(e -> {
+            new dashboard();
+            dispose();
+        });
+        inventoryItem.addActionListener(e -> {
+            new inventory();
+            dispose();
+        });
         fileMenu.add(exitItem);
         fileMenu.add(inventoryItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
         JPanel mainPanel = createMainPanel(panelColor, accentColor);
         add(mainPanel, BorderLayout.CENTER);
-        exitItem.addActionListener(e -> {
-            // ปิดหน้าต่างปัจจุบันและเปิด dashboard
-            new dashboard();
-            dispose();
-        });
-        inventoryItem.addActionListener(e -> {
-            // ปิดหน้าต่างปัจจุบันและเปิด inventory
-            new inventory();
-            dispose();
-        });
 
         // เพิ่มขอบ (padding) ให้กับเนื้อหาหลัก
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -576,14 +574,6 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
     valueLabel.setForeground(valueColor);
     valueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
     parent.add(valueLabel, gbc);
-}
-
-
-
-@Override
-public void actionPerformed(ActionEvent e) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'actionPerformed'");
 }
 
 }
