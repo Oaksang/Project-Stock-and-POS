@@ -1,3 +1,5 @@
+package UI;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,7 +53,17 @@ public class Jflame_dashboard_order extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem exitItem = new JMenuItem("Go to Dashboard");
+        JMenuItem inventoryItem = new JMenuItem("Go to Inventory");
+        exitItem.addActionListener(e -> {
+            new dashboard();
+            dispose();
+        });
+        inventoryItem.addActionListener(e -> {
+            new inventory();
+            dispose();
+        });
         fileMenu.add(exitItem);
+        fileMenu.add(inventoryItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
         JPanel mainPanel = createMainPanel(panelColor, accentColor);

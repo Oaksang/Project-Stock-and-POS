@@ -33,9 +33,6 @@ public class PricingService implements DiscountStategy {
         return totalAfterDiscount;
     }
 
-    public double calDiscount(double amount) {
-        return 0.0; // ไม่มีส่วนลด
-    }
     @Override
     public double calDiscount(double amount, String code) {
         if ("SALE20".equals(code)) {

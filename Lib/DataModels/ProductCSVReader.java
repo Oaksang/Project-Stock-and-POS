@@ -53,12 +53,4 @@ public class ProductCSVReader {
         }
         return products;
     }
-    // Test ProductCSVReader class
-    public static void main(String[] args) {
-        ProductCSVReader reader = new ProductCSVReader();
-        List<Product> products = reader.readProductsFromCSV();
-        for (Product p : products) {
-            System.out.println(p);
-        }
-    }
 }

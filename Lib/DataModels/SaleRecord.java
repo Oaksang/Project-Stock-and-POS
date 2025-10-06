@@ -1,4 +1,6 @@
 package DataModels;
+import java.time.LocalDate;
+
 import Services.PricingService;
 
 public class SaleRecord {
@@ -49,8 +51,8 @@ public class SaleRecord {
         
     public String getDiscountCode() { 
         return discountCode; }
-    
-    public LocalDate getSaleTime() {
+
+    public LocalDate getSaleTime(){
         return LocalDate.now();
     }
     // Test SaleRecord class
