@@ -49,7 +49,10 @@ public class SaleRecord {
         
     public String getDiscountCode() { 
         return discountCode; }
-
+    
+    public LocalDate getSaleTime() {
+        return LocalDate.now();
+    }
     // Test SaleRecord class
     public static void main(String[] args) {
         SaleRecord saleRecord = new SaleRecord("O001",1234.56,1000.00,50.00,70.00,1020.00,"Cash","SALE20");
