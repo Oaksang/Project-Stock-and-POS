@@ -1,6 +1,10 @@
 package UI;
 
 import javax.swing.*;
+
+import Exception.ProductNotFoundException;
+import Services.InventoryService;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,9 +13,13 @@ public class remove_inventory extends JFrame implements ActionListener{
     JButton home,back,remove;
     JTextField sku,quantity;
     JLabel sku_t,quantity_t;
+    private final InventoryService inventoryService;
+    private final inventory parentFrame;
     ImageIcon home_pic=new ImageIcon("./picture/home.png");
-    public remove_inventory(){
+    public remove_inventory(InventoryService inventoryService,inventory parentFrame){
       super("MR.DRY");
+      this.inventoryService = inventoryService; // รับ InventoryService เข้ามา
+      this.parentFrame = parentFrame;
        Initial();
        setComponent();
        Finally();
@@ -73,15 +81,49 @@ public class remove_inventory extends JFrame implements ActionListener{
  }
     @Override
     public void actionPerformed(ActionEvent e) {
+      if (e.getSource() == remove) {
+            // ดึง SKU จากผู้ใช้
+            String skuInput = sku.getText().trim();
+
+            try {
+                // ตรวจสอบข้อมูลนำเข้า
+                if (skuInput.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Please enter the SKU to remove.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // เรียกใช้ removeBySku ซึ่งจะลบจากหน่วยความจำและบันทึกเข้า CSV
+                // Note: การลบสินค้าทั้งชิ้นใช้แค่ SKU เท่านั้น
+                inventoryService.removeBySku(skuInput);
+
+                // แสดงผลสำเร็จและปิดหน้าจอ
+                JOptionPane.showMessageDialog(this, 
+                    "Product with SKU '" + skuInput + "' removed successfully and saved to CSV!", 
+                    "Success", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                    parentFrame.loadProductData(); 
+                this.dispose();
+
+            } catch (ProductNotFoundException ex) {
+                // จัดการเมื่อไม่พบ SKU
+                JOptionPane.showMessageDialog(this, 
+                    "Error: Product with SKU '" + skuInput + "' not found.", 
+                    "Operation Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                // จัดการข้อผิดพลาดอื่นๆ ที่อาจเกิดขึ้น
+                 JOptionPane.showMessageDialog(this, 
+                    "An unexpected error occurred: " + ex.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        } else if (e.getSource() == back) {
+            dispose();
+        }
         if(e.getSource()==home){
         new dashboard();
         dispose();
-     }else if(e.getSource()==remove){
-        //delete file
-        dispose();
-     }
-     else if(e.getSource()==back){
-        dispose();
-     }
+     
+        }
     }
 }
