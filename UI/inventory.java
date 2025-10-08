@@ -1,80 +1,128 @@
 package UI;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+import DataModels.Product;
+import DataModels.ProductCSVReader;
+import Services.InventoryService;
+import Services.MemmoryInventoryService;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Vector;
 public class inventory extends JFrame implements ActionListener{
     Container cp;
     JTextField search;
-    JRadioButton New,out,old;
-    JList item;
+    JRadioButton sortstock,sortprice;
+    JTable productTable;
+    DefaultTableModel tableModel; 
+    JScrollPane tableScrollPane;
     JButton add,remove;
     JComboBox add_product;
     JButton home,ham;
     JPanel p,p_top;
     JButton inventory,Pos,logout;
+    JTextField sku,quantity,name,price;
+    JButton search_button;
     boolean check_p=false;
+    private final InventoryService inventoryService; 
     ImageIcon home_pic=new ImageIcon("./picture/home.png");
     ImageIcon ham_pic=new ImageIcon("./picture/hamburger.png");
     ImageIcon out_pic=new ImageIcon("./picture/logout.png");
+
     public inventory(){
        super("MR.DRY");
+       // โหลดสินค้าทั้งหมดจาก CSV
+       ProductCSVReader csvReader = new ProductCSVReader();
+       List<Product> initialProducts = csvReader.readProductsFromCSV();
+       
+       // สร้าง InventoryService โดยใช้สินค้าที่โหลดมา
+       this.inventoryService = new MemmoryInventoryService(initialProducts);
        Initial();
        setComponent();
        Finally();
+
+       loadProductData(); 
     }
+
     public void Initial(){
     cp=getContentPane();
     cp.setLayout(null);
     cp.setBackground(new Color(216,191,216));
     }
+
     public void setComponent(){
+    // ค้นหาสินค้า
     search=new JTextField("search product");
     search.setFont(new Font("Garamond",Font.BOLD, 16));
-    search.setBounds(260, 10, 200,20);
-    JLabel search_t=new JLabel("Search");
-    search_t.setForeground(new Color(250,248,228));
-    search_t.setFont(new Font("Garamond",Font.BOLD, 16));
-    search_t.setBackground(new Color(216,191,216));
-    search_t.setBounds(470, 10, 50, 20);
-    New=new JRadioButton("sort by recent",false);
-    New.setForeground(new Color(250,248,228));
-    New.setFont(new Font("Garamond",Font.BOLD, 18));
-    New.setBounds(15, 40, 150, 30);
-    New.setBackground(new Color(216,191,216));
-    old=new JRadioButton("sort by stale",false);
-    old.setForeground(new Color(250,248,228));
-    old.setFont(new Font("Garamond",Font.BOLD, 18));
-    old.setBounds(180, 40, 150, 30);
-    old.setBackground(new Color(216,191,216));
-    out=new JRadioButton("sort by out stock",false);
-    out.setForeground(new Color(250,248,228));
-    out.setFont(new Font("Garamond",Font.BOLD, 18));
-    out.setBounds(340, 40, 200, 30);
-    out.setBackground(new Color(216,191,216));
+    search.setBounds(220, 10, 200,20);
+    search.setBackground(new Color(250,250,250));
+    // Label search
+    search_button=new JButton("Search");
+    search_button.setForeground(new Color(216,191,216));
+    search_button.setFont(new Font("Garamond",Font.BOLD, 16));
+    search_button.setBackground(new Color(250,250,250));
+    search_button.setBounds(430, 10, 90, 20);
+    search_button.setBorderPainted(false);
 
+    // กดเลือกการจัดเรียง
+    sortprice=new JRadioButton("sort by price",false);
+    sortprice.setForeground(new Color(250,248,228));
+    sortprice.setFont(new Font("Garamond",Font.BOLD, 18));
+    sortprice.setBounds(15, 40, 200, 30);
+    sortprice.setBackground(new Color(216,191,216));
+
+    sortstock=new JRadioButton("sort by out stock",false);
+    sortstock.setForeground(new Color(250,248,228));
+    sortstock.setFont(new Font("Garamond",Font.BOLD, 18));
+    sortstock.setBounds(180, 40, 200, 30);
+    sortstock.setBackground(new Color(216,191,216));
+
+    // กลุ่มปุ่มเลือก
     ButtonGroup group=new ButtonGroup();
-    group.add(New);
-    group.add(old);
-    group.add(out);
-    item=new JList<String>();//product class
-    item.setForeground(new Color(216,191,216));
-    item.setFont(new Font("Garamond",Font.BOLD, 18));
-    item.setBounds(10, 70, 485, 400);
-    item.setBackground(new Color(250,250,250));
+    group.add(sortprice);
+    group.add(sortstock);
+    // 1. ตั้งค่า Model และ Header
+        String[] columnNames = {"SKU", "Name", "Price", "Stock"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            // ทำให้ตารางแก้ไขข้อมูลไม่ได้
+            @Override
+            public boolean isCellEditable(int row, int column) {
+               return false;
+            }
+        };
+        
+        // 2. สร้าง JTable และ JScrollPane
+        productTable = new JTable(tableModel);
+        productTable.setFont(new Font("Garamond", Font.PLAIN, 14));
+        productTable.setRowHeight(25);
+        productTable.getTableHeader().setFont(new Font("Garamond", Font.BOLD, 16));
+        productTable.getTableHeader().setBackground(new Color(192, 192, 192));
+        
+        tableScrollPane = new JScrollPane(productTable);
+        
+        tableScrollPane.setBounds(65, 70, 400, 400);
+        
+        // 3. เพิ่ม JScrollPane (ซึ่งมี JTable อยู่ข้างใน) เข้าสู่ Container
+        cp.add(tableScrollPane);
+    // ปุ่มเพิ่มสินค้า
     add=new JButton("Add");
     add.setForeground(new Color(216,191,216));
     add.setFont(new Font("Garamond",Font.BOLD, 30));
     add.setBounds(10,480,150,40);
     add.setBackground(new Color(250,250,250));
     add.setBorderPainted(false);
+    // ปุ่มลบสินค้า
     remove=new JButton("Delete");
     remove.setForeground(new Color(216,191,216));
     remove.setFont(new Font("Garamond",Font.BOLD, 30));
     remove.setBounds(10,530,150,40);
     remove.setBackground(new Color(250,250,250));
     remove.setBorderPainted(false);
+
+    // เลือกเพิ่มสินค้าแบบไหน
     add_product=new JComboBox<String>();
     add_product.addItem("add new product");
     add_product.addItem("add quantity product");
@@ -82,12 +130,16 @@ public class inventory extends JFrame implements ActionListener{
     add_product.setFont(new Font("Garamond",Font.BOLD, 18));
     add_product.setBounds(170,480,200,20);
     add_product.setBackground(new Color(250,250,250));
+
+    // ปุ่ม home
     home=new JButton();
     home.setIcon(home_pic);
     home.setBackground(new Color(216,191,216));
     home.setSize(20, 20);
     home.setBorderPainted(false);
     home.setBounds(0,0,20,20);
+
+    // ปุ่ม ham
     ham=new JButton();
     ham.setIcon(ham_pic);
     ham.setBackground(new Color(216,191,216));
@@ -136,12 +188,10 @@ public class inventory extends JFrame implements ActionListener{
     cp.add(add_product);
     cp.add(remove);
     cp.add(add);
-    cp.add(item);
-    cp.add(out);
-    cp.add(old);
-    cp.add(New);
+    cp.add(sortstock);
+    cp.add(sortprice);
     cp.add(search);
-    cp.add(search_t);
+    cp.add(search_button);
     ham.addActionListener(this);
     home.addActionListener(this);
     inventory.addActionListener(this);
@@ -149,6 +199,9 @@ public class inventory extends JFrame implements ActionListener{
     add.addActionListener(this);
     logout.addActionListener(this);
     Pos.addActionListener(this);
+    sortprice.addActionListener(this);
+    sortstock.addActionListener(this);
+    search_button.addActionListener(this);
     p.add(p_top);
     this.setGlassPane(p);
     p.setVisible(false);
@@ -192,18 +245,17 @@ public class inventory extends JFrame implements ActionListener{
                 dispose();
         }else if(e.getSource()==add){
             String select=(String)add_product.getSelectedItem();
-            if(select=="add new product"){
-                new add2_inventory();
-                //dispose();
-            }else if(select=="add quantity product"){
-                new add_inventory();
-                //dispose();
+            // 
+            if(select.equals("add new product")){ 
+                new add2_inventory(this.inventoryService, this); 
+            }else if(select.equals("add quantity product")){ 
+                new add_inventory(this.inventoryService, this); 
             }
         }else if(e.getSource()==remove){
-                new remove_inventory();
-                //dispose();
+            new remove_inventory(this.inventoryService, this); 
+
         }else if(e.getSource()==inventory){
-             if (check_p) {
+            if (check_p) {
                 home.setBounds(0, 0, 20, 20);
                 ham.setBounds(21, 0, 20, 20);
                 home.setBackground(new Color(216, 191, 216));
@@ -220,7 +272,47 @@ public class inventory extends JFrame implements ActionListener{
             dispose();
         } else if(e.getSource()==Pos){
             new Jflame_dashboard_order();
-          dispose();
+            dispose();
+        }else if(sortprice.isSelected()){
+           this.sortProductData(true);
+        }else if(sortstock.isSelected()){
+           this.sortProductData(false);
+        } else if(e.getSource()==search){
+         //น่าจะต้องgettext form searchtext maybe
         }
     }
+    public void loadProductData() {
+        // ล้างข้อมูลเก่าทั้งหมดในตาราง
+        tableModel.setRowCount(0);
+
+        // ดึงข้อมูลสินค้าล่าสุดจาก MemoryInventoryService
+        List<Product> products = inventoryService.getAll();
+
+        // วนลูปเพื่อเพิ่มแต่ละรายการสินค้าเข้าสู่ tableModel
+        for (Product product : products) {
+            Vector<Object> row = new Vector<>();
+            row.add(product.sku());
+            row.add(product.name());
+            row.add(String.format("%.2f", product.price())); // จัดรูปแบบราคา
+            row.add(product.stock());
+            tableModel.addRow(row);
+        }
+    }
+    public void sortProductData(boolean sort) {
+        tableModel.setRowCount(0);
+        List<Product> products;
+        if(sort)
+        products = inventoryService.sortByPrice(false);
+        else products=inventoryService.sortByStock(true);
+        for (Product product : products) {
+            Vector<Object> row = new Vector<>();
+            row.add(product.sku());
+            row.add(product.name());
+            row.add(String.format("%.2f", product.price())); // จัดรูปแบบราคา
+            row.add(product.stock());
+            tableModel.addRow(row);
+        }
+    }
+      
 }
+  

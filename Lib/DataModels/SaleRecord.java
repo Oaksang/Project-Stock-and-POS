@@ -1,7 +1,6 @@
 package DataModels;
 import java.time.LocalDate;
 
-import Services.PricingService;
 
 public class SaleRecord {
     private String orderId;
@@ -54,19 +53,6 @@ public class SaleRecord {
 
     public LocalDate getSaleTime(){
         return LocalDate.now();
-    }
-    // Test SaleRecord class
-    public static void main(String[] args) {
-        SaleRecord saleRecord = new SaleRecord("O001",1234.56,1000.00,50.00,70.00,1020.00,"Cash","SALE20");
-        System.out.println("Order ID: " + saleRecord.getOrderId());
-        System.out.println("Total Sales: " + saleRecord.getTotalSales());
-        System.out.println("Subtotal: " + saleRecord.getSubtotal());
-        System.out.println("Discount: " + saleRecord.getDiscount());
-        System.out.println("Tax: " + saleRecord.getTax());
-        System.out.println("Total: " + saleRecord.getTotal());
-        System.out.println("Payment Method: " + saleRecord.getPaymentMethod());
-        System.out.println("Discount Code: " + saleRecord.getDiscountCode());
-
     }
 
 }

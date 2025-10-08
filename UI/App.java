@@ -2,7 +2,6 @@ package UI;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-
 public class App {
     loginpanel panel;
     public App() {
@@ -20,6 +19,3 @@ public class App {
     }
     
 }
-
-
-

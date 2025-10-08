@@ -1,9 +1,15 @@
 package UI;
 import javax.swing.*;
+import DataModels.Product;
+import DataModels.ProductCSVReader;
+import DataModels.SaleCSVRead;
 
+import java.util.List;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.time.LocalDate;
 public class dashboard extends JFrame implements ActionListener{
  Container cp;
  JButton ham,home;
@@ -13,12 +19,55 @@ public class dashboard extends JFrame implements ActionListener{
  ImageIcon home_pic=new ImageIcon("./picture/home.png");
  ImageIcon ham_pic=new ImageIcon("./picture/hamburger.png");
  ImageIcon out_pic=new ImageIcon("./picture/logout.png");
+ ProductCSVReader csvReader;
+ List<Product> initialProducts;
+ SaleCSVRead csvReaderSale;
+ List<String[]> kuy;
  public dashboard(){
     super("MR.DRY");
+    csvReader=new ProductCSVReader();
+    initialProducts = csvReader.readProductsFromCSV();
+    csvReaderSale=new SaleCSVRead();
+    kuy=csvReaderSale.readSaleFromCSV();
     Initial();
     setComponent();
     Finally();
  }
+ public int showlow(List<Product> lowStock,int low){
+  List <Product> lowproduct=new ArrayList<>();
+  for(Product p: lowStock){
+  if((p.stock()<low)&&(p.stock()>0))
+  lowproduct.add(p);
+  }
+  int lenght=lowproduct.size();
+  return lenght;
+ }
+ public int showout(List <Product> outStock){
+ List <Product> outproduct=new ArrayList<>();
+ for(Product p: outStock){
+  if(p.stock()==0)
+  outproduct.add(p);
+ }
+ int lenght=outproduct.size();
+ return lenght;
+ }
+ public int showstock(List<Product> Stock){
+     int lenght=Stock.size();
+     return lenght;
+ }
+public double showsale(List <String[]> recordsale){
+  LocalDate Today=LocalDate.now();
+  double price_total=0;
+  for(String[] s: recordsale){
+    String orderid = s[0].trim();
+    double price = Double.parseDouble(s[1].trim());
+    LocalDate date = LocalDate.parse(s[2].trim());
+    if(Today.equals(date)){
+    price_total+=price;
+    }
+}
+ return price_total;
+}
  public void Initial(){
     cp=getContentPane();
     cp.setLayout(null);
@@ -49,30 +98,48 @@ public class dashboard extends JFrame implements ActionListener{
    total.setBackground(new Color(216,191,216));
    total.setForeground(new Color(250, 248, 228));
    total.setBounds(60,130,150, 50);
+   JLabel totalstock=new JLabel(""+showstock(initialProducts));
+   totalstock.setHorizontalAlignment(JLabel.LEFT);
+   totalstock.setFont(new Font("Garamond",Font.BOLD, 50));
+   totalstock.setBackground(new Color(216,191,216));
+   totalstock.setForeground(new Color(250, 248, 228));
+   totalstock.setBounds(60,190,150, 50);
    JLabel low=new JLabel("Low Stock");
    low.setHorizontalAlignment(JLabel.LEFT);
    low.setFont(new Font("Garamond",Font.BOLD, 30));
    low.setBackground(new Color(216,191,216));
    low.setForeground(new Color(250, 248, 228));
    low.setBounds(320,130,150, 50);
+   JLabel lowstock=new JLabel(""+showlow(initialProducts,10));
+   lowstock.setHorizontalAlignment(JLabel.LEFT);
+   lowstock.setFont(new Font("Garamond",Font.BOLD, 50));
+   lowstock.setBackground(new Color(216,191,216));
+   lowstock.setForeground(new Color(255, 218, 185));
+   lowstock.setBounds(320,190,150, 50);
    JLabel out=new JLabel("Out Stock");
    out.setHorizontalAlignment(JLabel.LEFT);
    out.setFont(new Font("Garamond",Font.BOLD, 30));
    out.setBackground(new Color(216,191,216));
    out.setForeground(new Color(250, 248, 228));
    out.setBounds(65,300,150, 50);
-   JLabel best=new JLabel("Best selling");
-   best.setHorizontalAlignment(JLabel.LEFT);
-   best.setFont(new Font("Garamond",Font.BOLD, 30));
-   best.setBackground(new Color(216,191,216));
-   best.setForeground(new Color(250, 248, 228));
-   best.setBounds(320,300,180, 50);
+   JLabel outstock=new JLabel(""+showout(initialProducts));
+   outstock.setHorizontalAlignment(JLabel.LEFT);
+   outstock.setFont(new Font("Garamond",Font.BOLD, 50));
+   outstock.setBackground(new Color(216,191,216));
+   outstock.setForeground(new Color(220, 49, 100));
+   outstock.setBounds(65,350,150, 50);
    JLabel sale=new JLabel("Today Sale");
    sale.setHorizontalAlignment(JLabel.LEFT);
    sale.setFont(new Font("Garamond",Font.BOLD, 30));
    sale.setBackground(new Color(216,191,216));
    sale.setForeground(new Color(250, 248, 228));
    sale.setBounds(65,450,180, 50);
+   JLabel showsale=new JLabel(showsale(kuy)+"Baht");
+   showsale.setHorizontalAlignment(JLabel.LEFT);
+   showsale.setFont(new Font("Garamond",Font.BOLD, 50));
+   showsale.setBackground(new Color(216,191,216));
+   showsale.setForeground(new Color(250, 248, 228));
+   showsale.setBounds(65,500,400, 50);
    p_top=new JPanel();
    p_top.setLayout(null);
    p_top.setBackground(new Color(250,248,228));
@@ -114,10 +181,14 @@ public class dashboard extends JFrame implements ActionListener{
    cp.add(ham);
    cp.add(Dashboard);
    cp.add(total);
+   cp.add(totalstock);
    cp.add(low);
+   cp.add(lowstock);
    cp.add(out);
-   cp.add(best);
+   cp.add(outstock);
+   //cp.add(best);
    cp.add(sale);
+   cp.add(showsale);
    ham.addActionListener(this);
    home.addActionListener(this);
    inventory.addActionListener(this);
