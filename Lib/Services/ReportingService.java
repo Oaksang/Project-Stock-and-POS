@@ -1,15 +1,20 @@
 package Services;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
+import DataModels.Product;
 import DataModels.SaleRecord;
 
 public class ReportingService {
-
+    private static final String CSV_HEADER = "orderId,cost,date";
     ArrayList<SaleRecord> saleRecords ;
 
     public ReportingService() {
@@ -21,15 +26,15 @@ public class ReportingService {
         saleRecords.add(saleRecord);
     }
 
-    public void summarizeDailySales(LocalDate date) {
+    public double summarizeDailySales(LocalDate date) {
         double totalSales = saleRecords.stream()
                 .filter(record -> record.getSaleTime().equals(date))
                 .mapToDouble(SaleRecord::getTotal)
                 .sum();
         System.out.println("Total sales for " + date + ": $" + totalSales);
+        return totalSales;
     }
-
-    public void writeReportToFile(String filename,LocalDate date) {
+    public void writeReportToFile(String filename,LocalDate date){
         // Implement file writing logic here
         File f = new File(filename);
         FileWriter fw = null;
@@ -37,8 +42,10 @@ public class ReportingService {
         try {
             fw = new FileWriter(f);
             bw = new BufferedWriter(fw);
+            bw.write(CSV_HEADER);
+            bw.newLine();
             for (SaleRecord record : saleRecords) {
-                bw.write("Order ID: " + record.getOrderId() + ", Total: $" + record.getTotal()+", Date: " + record.getSaleTime());
+                bw.write(record.getOrderId() + "," + record.getTotal()+"," + record.getSaleTime());
                 bw.newLine();
             }
             bw.close();
@@ -55,8 +62,6 @@ public class ReportingService {
                 }
             }
     }
-
-    
     // Test ReportingService class
     public static void main(String[] args) {
         ReportingService reportingService = new ReportingService();
@@ -67,10 +72,6 @@ public class ReportingService {
         reportingService.appendSaleRecord(saleRecord1);
         reportingService.appendSaleRecord(saleRecord2);
         reportingService.summarizeDailySales(LocalDate.now());
-        reportingService.writeReportToFile("daily_report.csv", LocalDate.now());
-    }
-
-
-
-    
+        reportingService.writeReportToFile("./FileCSV/daily_report.csv", LocalDate.now());
+    }  
 }

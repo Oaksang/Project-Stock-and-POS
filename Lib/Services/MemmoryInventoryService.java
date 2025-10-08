@@ -1,8 +1,8 @@
 package Services;
 
 import java.util.ArrayList;
-//import java.util.Collections;
-//import java.util.Comparator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import DataModels.*;
@@ -16,10 +16,72 @@ import Exception.*;
 public class MemmoryInventoryService implements InventoryService{
 
     private final List<Product> productList = new ArrayList<>();
-    @Override
+    // ตัวแปรสำหรับเขียนไฟล์ CSV
+    private final ProductCSVWriter csvWriter; 
+
+    /**
+     * สร้างคลังสินค้าเปล่า
+     */
+    public MemmoryInventoryService(List<DataModels.Product> initialProducts) {
+        if (initialProducts != null) {
+            this.productList.addAll(initialProducts);
+        }
+        this.csvWriter = new ProductCSVWriter(); 
+    }
     public List<Product> getAll() {
         return new ArrayList<>(productList); 
     }
+    @Override
+    public List<Product> sortByPrice(boolean isAscending) {
+    List<Product> resultList = getAll(); 
+    Comparator<Product> byPrice = new Comparator<Product>() {
+
+        public int compare(Product p1, Product p2) {
+            if (p1.price() < p2.price()) return -1; // ราคา p1 ถูกกว่า p2 return -1 หมายความว่าตามหลัก P1 ควรมาก่อน P2
+            if (p1.price() > p2.price()) return 1; // ถ้า p1 แพงกว่า p2 ให้ return 1 หมายถึง p1 ควรอยู่หลัง p2
+            return 0; // เท่ากัน
+        }
+    };
+    Collections.sort(resultList, byPrice); //บรรทัดนี้ใช้เมธอด sort จากคลาส Collections เพื่อเรียงลำดับ resultList
+    if (!isAscending) { //Check ว่าเรียงจาก มากไป น้อยมั้ย
+        Collections.reverse(resultList); // เพื่อกลับลำดับของรายการสินค้า ทำให้ผลลัพธ์สุดท้ายเป็นการเรียงจากมากไปน้อย
+    }
+    return resultList;
+}
+@Override
+    public List<Product> lowStock(int lowStocksort) {
+        List<Product> resultList = new ArrayList<>();
+        for (Product p : productList) {
+            if (p.stock() < lowStocksort) {
+                resultList.add(p);
+            }
+        }
+        resultList.sort(Comparator.comparingInt(Product::stock)); // น้อยไปมาก
+       // resultList.sort(Comparator.comparingInt(Product::stock).reversed()); // มากไปน้อย
+
+        return resultList;
+    }
+
+    @Override
+    public List<Product> sortByStock(boolean isAscending) {
+    List<Product> resultList = getAll();
+    Comparator<Product> byStick = new Comparator<Product>() {
+
+        public int compare(Product p1, Product p2){
+            if (p1.stock()<p2.stock())
+            return -1;
+            if (p1.stock()>p2.stock()) 
+            return 1;
+            return 0 ; // เท่ากัน
+        }
+    };
+    Collections.sort(resultList,byStick);
+    if (!isAscending) {
+        Collections.reverse(resultList);
+    }
+    return resultList;
+    }
+
     @Override // หา สินค้า 1 ชิ้น ด้วยรหัส SKU (ไม่สนตัวพิมพ์) จากฟังชัน  indexOfSku
         public Product getBySku(String sku) throws ProductNotFoundException {
         int index = indexOfSku(sku);
@@ -84,59 +146,67 @@ public class MemmoryInventoryService implements InventoryService{
 
     @Override
     public void addProduct(Product product) {
-        Productnotnull(product, "product"); // กันพลาด: ต้องมีสินค้า
-        int index = indexOfSku(product.sku()); // หาในคลัง เทียบ SKU ไม่สนตัวพิมพ์
-
-         if (index >= 0) { // มีProductอยู่แล้ว                          
-        productList.set(index, product);
-            } else { // ยังไม่มี
-        productList.add(product);                  
+        if (CheckSku(product.sku())) {
+            throw new RuntimeException("SKU already exists: " + product.sku());
+        }
+        productList.add(product);
+        // บันทึกรายการสินค้าทั้งหมดลงใน CSV
+        csvWriter.writeAllProductsToCSV(productList);
     }
-}
 
     @Override
     public void removeBySku(String sku) throws ProductNotFoundException {
-        int index = indexOfSku(sku); //หาในคลัง                          
-        if (index < 0) { // หาไม่เจอ                                   
+        
+        int index = indexOfSku(sku);
+        
+        if (index < 0) {
             throw new ProductNotFoundException("SKU not found: " + sku);
-    }
+        }
 
-    productList.remove(index); 
+        productList.remove(index);
+        csvWriter.writeAllProductsToCSV(productList);
 }
 
-    @Override
-public void setStock(String sku, int newStock)
-        throws ProductNotFoundException, InvalidOperationException {
-    if (newStock < 0) {
-        throw new InvalidOperationException("newStock must be >= 0");
+@Override
+    public void setStock(String sku, int newStock)
+            throws ProductNotFoundException, InvalidOperationException {
+        // ... (Existing logic to find product, set stock) ...
+        int index = indexOfSku(sku);
+        if (index < 0) {
+            throw new ProductNotFoundException("SKU not found: " + sku);
+        }
+        
+        Product current = productList.get(index);
+        
+        if (newStock < 0) {
+             throw new InvalidOperationException("Stock cannot be negative.");
+        }
+        
+        current.setStock(newStock); 
+        // บันทึกรายการสินค้าทั้งหมดลงใน CSV
+        csvWriter.writeAllProductsToCSV(productList);
     }
-
-    int index = indexOfSku(sku);
-    if (index < 0) {
-        throw new ProductNotFoundException("SKU not found: " + sku);
-    }
-
-    Product current = productList.get(index);
-    current.setStock(newStock);
-}
 
   @Override
-public void increase(String sku, int qty)
-        throws ProductNotFoundException, InvalidOperationException {
-    if (qty <= 0) {
-        throw new InvalidOperationException("quantity must be > 0");
+    public void increase(String sku, int qty)
+            throws ProductNotFoundException, InvalidOperationException {
+        if (qty <= 0) {
+            throw new InvalidOperationException("quantity must be > 0");
+        }
+
+        int index = indexOfSku(sku);
+        if (index < 0) {
+            throw new ProductNotFoundException("SKU not found: " + sku);
+        }
+
+        Product current = productList.get(index);
+        int newStock = current.stock() + qty;
+        
+        current.setStock(newStock); 
+
+        // บันทึกรายการสินค้าทั้งหมดลงใน CSV
+        csvWriter.writeAllProductsToCSV(productList);
     }
-
-    int index = indexOfSku(sku);
-    if (index < 0) {
-        throw new ProductNotFoundException("SKU not found: " + sku);
-    }
-
-    Product current = productList.get(index);
-    int newStock = current.stock() + qty;
-
-    current.setStock(newStock);
-}
 
     @Override
     public void decrease(String sku, int qty)
@@ -168,12 +238,8 @@ public void increase(String sku, int qty)
                 return i; // พบสินค้า
             }
         }
+        csvWriter.writeAllProductsToCSV(productList); // บันทึกรายการสินค้าทั้งหมดลงใน CSV
         return -1; // ถ้าไม่พบ
-    }
-
-
-    private static void Productnotnull(Object value, String name) { //ป้องกันการไม่มีสินค้า
-        if (value == null) throw new IllegalArgumentException(name + " is required");
     }
     
 
