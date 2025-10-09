@@ -142,8 +142,6 @@ public class MemmoryInventoryService implements InventoryService{
     return resultList;
     
 }
-    
-
     @Override
     public void addProduct(Product product) {
         if (CheckSku(product.sku())) {

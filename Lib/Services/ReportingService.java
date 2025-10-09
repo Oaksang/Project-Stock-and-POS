@@ -39,12 +39,16 @@ public class ReportingService {
         File f = new File(filename);
         FileWriter fw = null;
         BufferedWriter bw = null;
+        boolean check_header;
         try {
-            fw = new FileWriter(f);
+            fw = new FileWriter(f,true);
             bw = new BufferedWriter(fw);
-            bw.write(CSV_HEADER);
-            bw.newLine();
+            check_header=f.exists()&&f.length()>0;
             for (SaleRecord record : saleRecords) {
+                if(!check_header){
+                    bw.write(CSV_HEADER);
+                    bw.newLine();
+                }
                 bw.write(record.getOrderId() + "," + record.getTotal()+"," + record.getSaleTime());
                 bw.newLine();
             }

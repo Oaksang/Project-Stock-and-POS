@@ -10,6 +10,7 @@ import Services.MemmoryInventoryService;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 public class inventory extends JFrame implements ActionListener{
@@ -21,6 +22,7 @@ public class inventory extends JFrame implements ActionListener{
     JScrollPane tableScrollPane;
     JButton add,remove;
     JComboBox add_product;
+    JComboBox search_product;
     JButton home,ham;
     JPanel p,p_top;
     JButton inventory,Pos,logout;
@@ -31,7 +33,7 @@ public class inventory extends JFrame implements ActionListener{
     ImageIcon home_pic=new ImageIcon("./picture/home.png");
     ImageIcon ham_pic=new ImageIcon("./picture/hamburger.png");
     ImageIcon out_pic=new ImageIcon("./picture/logout.png");
-
+    
     public inventory(){
        super("MR.DRY");
        // โหลดสินค้าทั้งหมดจาก CSV
@@ -71,7 +73,7 @@ public class inventory extends JFrame implements ActionListener{
     sortprice=new JRadioButton("sort by price",false);
     sortprice.setForeground(new Color(250,248,228));
     sortprice.setFont(new Font("Garamond",Font.BOLD, 18));
-    sortprice.setBounds(15, 40, 200, 30);
+    sortprice.setBounds(15, 40, 130, 30);
     sortprice.setBackground(new Color(216,191,216));
 
     sortstock=new JRadioButton("sort by out stock",false);
@@ -84,6 +86,7 @@ public class inventory extends JFrame implements ActionListener{
     ButtonGroup group=new ButtonGroup();
     group.add(sortprice);
     group.add(sortstock);
+
     // 1. ตั้งค่า Model และ Header
         String[] columnNames = {"SKU", "Name", "Price", "Stock"};
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -130,7 +133,14 @@ public class inventory extends JFrame implements ActionListener{
     add_product.setFont(new Font("Garamond",Font.BOLD, 18));
     add_product.setBounds(170,480,200,20);
     add_product.setBackground(new Color(250,250,250));
-
+    
+    search_product=new JComboBox<String>();
+    search_product.addItem("search by SKU");
+    search_product.addItem("search by Name");
+    search_product.setForeground(new Color(216,191,216));
+    search_product.setFont(new Font("Garamond",Font.BOLD,16));
+    search_product.setBounds(60,10,155,20);
+    search_product.setBackground(new Color(250,250,250));
     // ปุ่ม home
     home=new JButton();
     home.setIcon(home_pic);
@@ -192,6 +202,7 @@ public class inventory extends JFrame implements ActionListener{
     cp.add(sortprice);
     cp.add(search);
     cp.add(search_button);
+    cp.add(search_product);
     ham.addActionListener(this);
     home.addActionListener(this);
     inventory.addActionListener(this);
@@ -202,6 +213,8 @@ public class inventory extends JFrame implements ActionListener{
     sortprice.addActionListener(this);
     sortstock.addActionListener(this);
     search_button.addActionListener(this);
+    search_product.addActionListener(this);
+    search.addActionListener(this);
     p.add(p_top);
     this.setGlassPane(p);
     p.setVisible(false);
@@ -274,11 +287,31 @@ public class inventory extends JFrame implements ActionListener{
             new Jflame_dashboard_order();
             dispose();
         }else if(sortprice.isSelected()){
+              if(e.getSource()==search_button)
            this.sortProductData(true);
         }else if(sortstock.isSelected()){
            this.sortProductData(false);
-        } else if(e.getSource()==search){
-         //น่าจะต้องgettext form searchtext maybe
+        } else if(e.getSource()==search_button){
+         String select=(String)search_product.getSelectedItem();
+        //  if(sortprice.isSelected())
+            this.searchProductData(this.check_stock(select,search.getText()));
+        //  else if(sortstock.isSelected()){
+        //  this.searchProductData(this.check_stock(select,search.getText(),false));
+         }
+
+         
+        }
+    
+    public void searchProductData(List<Product> p){
+        tableModel.setRowCount(0);
+
+        for (Product product : p) {
+            Vector<Object> row = new Vector<>();
+            row.add(product.sku());
+            row.add(product.name());
+            row.add(String.format("%.2f", product.price())); // จัดรูปแบบราคา
+            row.add(product.stock());
+            tableModel.addRow(row);
         }
     }
     public void loadProductData() {
@@ -313,6 +346,27 @@ public class inventory extends JFrame implements ActionListener{
             tableModel.addRow(row);
         }
     }
-      
-}
+     public List<Product> check_stock(String s,String search) {
+        List <Product> products=new ArrayList<>();
+        /*if(sort){
+           products=inventoryService.sortByPrice(false);
+        }else{
+            products=inventoryService.sortByStock(true);
+        }*/
+
+        if("search by Name".equalsIgnoreCase(s)){
+           products=inventoryService.searchByName(search);
+        }else if("search by SKU".equalsIgnoreCase(s)){
+           try {
+            products=inventoryService.searchBySku(search); 
+           } catch (Exception e) {
+            System.out.println(e);
+        } 
+      }
+       return products;
+     }
+     
+    
+}   
+
   
