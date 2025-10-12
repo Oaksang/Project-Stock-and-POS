@@ -678,7 +678,7 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
         try (FileWriter fw = new FileWriter(filePath, true); // true คือโหมด append (เขียนต่อท้าย)
             PrintWriter pw = new PrintWriter(fw)) {
             // สร้าง Order ID และ Date
-            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             String date = LocalDateTime.now().toLocalDate().toString();
             String line = String.format("%s,%.2f,%s", orderId, totalAmount, date);
             
