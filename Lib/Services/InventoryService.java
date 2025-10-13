@@ -16,9 +16,9 @@ public interface InventoryService {
     boolean CheckSku(String sku);
     List<Product> searchByName(String nameword);
     List<Product> searchBySku(String sku);
-   // List<Product> sortByPrice(boolean isAscending);
-   // List<Product> sortByStock(boolean isAscending);
-   // List<Product> lowStock(int lowStocksort);
+    List<Product> sortByPrice(boolean isAscending,List<Product> select);
+    List<Product> sortByStock(boolean isAscending,List<Product> select);
+    List<Product> lowStock(int lowStocksort);
 
     void addProduct(Product product);
     void removeBySku(String sku) throws ProductNotFoundException;

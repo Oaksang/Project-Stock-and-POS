@@ -107,13 +107,16 @@ public class loginpanel extends JFrame implements ActionListener{
         
 
         // Event check
-            btnLogin.addActionListener(new ActionListener() {
+       /* btnLogin.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             checkLogin();  
             }
-        });
-         btnLogin.addActionListener(this);
+        }); */
+
+        
+        btnLogin.addActionListener(this);
+        txtPassword.addActionListener(this);
         this.setSize(400,400);
         this.setVisible(true);
         this.setLocationRelativeTo(null);
@@ -121,33 +124,40 @@ public class loginpanel extends JFrame implements ActionListener{
     }
 
     private boolean checkLogin() {
-        String user = txtUser.getText().trim();
-        String pass = new String(txtPassword.getPassword()).trim();
-
-        if (user.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please input Username and Password",
-                "Warning", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-
-        if (user.equals("1") && pass.equals("123")) {
-            JOptionPane.showMessageDialog(this, "Login successful !",
-                "Success", JOptionPane.INFORMATION_MESSAGE);
-                return true;
-        } else {
-            JOptionPane.showMessageDialog(this, "Username or Password is incorrect",
-                "Error", JOptionPane.ERROR_MESSAGE);
-                return false;
-        }
+    String user = txtUser.getText().trim();
+    String pass = new String(txtPassword.getPassword()).trim();
+    return "1".equals(user) && "123".equals(pass);
     }
+
+
+    private void doLogin() {
+    String user = txtUser.getText().trim();
+    String pass = new String(txtPassword.getPassword()).trim();
+
+    if (user.isEmpty() || pass.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please input Username and Password",
+                "Warning", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    if (checkLogin()) {
+        JOptionPane.showMessageDialog(this, "Login successful!",
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+        SwingUtilities.invokeLater(() -> {
+            new dashboard();  // เปิดหน้าใหม่
+        });
+        dispose();            // ปิด login หลังเปิดหน้าใหม่
+    } else {
+        JOptionPane.showMessageDialog(this, "Username or Password is incorrect",
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource()==btnLogin){
-            if(checkLogin()){
-                new dashboard();
-                dispose();
-            }
+        if(e.getSource()==btnLogin || e.getSource()==txtPassword){
+                doLogin();
         }
     }
     

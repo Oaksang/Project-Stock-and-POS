@@ -1,19 +1,27 @@
 package UI;
 import javax.swing.*;
+
+import DataModels.Product;
+import Services.InventoryService;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 public class add2_inventory extends JFrame implements ActionListener{
     Container cp;
-    JButton home,back,add;
+    JButton home,add;
     JTextField sku,quantity,name,price;
     JLabel sku_t,quantity_t,name_t,price_t;
+    private final InventoryService inventoryService; 
+    private final inventory parentFrame;
     ImageIcon home_pic=new ImageIcon("./picture/home.png");
-    public add2_inventory(){
+    public add2_inventory(InventoryService inventoryService,inventory parentFrame){
       super("MR.DRY");
-       Initial();
-       setComponent();
-       Finally();
+      this.parentFrame = parentFrame;
+      this.inventoryService = inventoryService; // รับ InventoryService เข้ามา
+      Initial();
+      setComponent();
+      Finally();
     }
     public void Initial(){
     cp=getContentPane();
@@ -61,17 +69,11 @@ public class add2_inventory extends JFrame implements ActionListener{
     add.setForeground(new Color(216,191,216));
     add.setFont(new Font("Garamond",Font.BOLD, 28));
     add.setBorderPainted(false);
-    back=new JButton("Back");
-    back.setBounds(150, 300, 98,40);
-    back.setBackground(new Color(250,250,250));
-    back.setForeground(new Color(216,191,216));
-    back.setFont(new Font("Garamond",Font.BOLD, 28));
-    back.setBorderPainted(false);
+
     cp.add(name);
     cp.add(name_t);
     cp.add(price);
     cp.add(price_t);
-    cp.add(back);
     cp.add(quantity_t);
     cp.add(sku_t);
     cp.add(sku);
@@ -80,25 +82,57 @@ public class add2_inventory extends JFrame implements ActionListener{
     cp.add(add);
     home.addActionListener(this);
     add.addActionListener(this);
-    back.addActionListener(this);
     }
     public void Finally(){
     this.setSize(320,400);
     this.setVisible(true);
     this.setLocationRelativeTo(null);
-    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
  }
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    if(e.getSource()==home){
-        new dashboard();
-        dispose();
-     }else if(e.getSource()==add){
-        //write file
-        dispose();
-     }
-     else if(e.getSource()==back){
-        dispose();
-     }
-    }
+   @Override
+   public void actionPerformed(ActionEvent e) {
+      if (e.getSource() == add) {
+            String skuInput = sku.getText().trim();
+            String nameInput = name.getText().trim();
+            String priceInput = price.getText().trim();
+            String qtyInput = quantity.getText().trim();
+
+            try {
+               if (skuInput.isEmpty() || nameInput.isEmpty() || priceInput.isEmpty() || qtyInput.isEmpty()) {
+                  JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                  return;
+               }
+               
+               double newPrice = Double.parseDouble(priceInput);
+               int newStock = Integer.parseInt(qtyInput);
+               
+               if (newPrice < 0 || newStock < 0) {
+                     JOptionPane.showMessageDialog(this, "Price and Quantity must be non-negative numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                     return;
+               }
+
+                // เรียกใช้ addProduct ซึ่งจะบันทึกเข้า CSV ด้วย
+               Product newProduct = new Product(skuInput, nameInput, newPrice, newStock);
+               inventoryService.addProduct(newProduct);
+
+               JOptionPane.showMessageDialog(this, "Product '" + nameInput + "' added successfully and saved to CSV!", "Success", JOptionPane.INFORMATION_MESSAGE);
+               this.dispose();
+
+   
+                // เรียกเมทอดอัปเดตข้อมูลของหน้าจอหลัก
+                parentFrame.loadProductData(); 
+                
+                this.dispose();
+
+            } catch (NumberFormatException ex) {
+               JOptionPane.showMessageDialog(this, "Price and Quantity must be valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            } catch (RuntimeException ex) {
+                // RuntimeException ถูกโยนเมื่อ SKU ซ้ำ
+               JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Operation Error", JOptionPane.ERROR_MESSAGE);
+            }
+      }else if(e.getSource()==home){
+      new dashboard();
+      dispose();
+   }
+   }
 }

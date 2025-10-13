@@ -3,29 +3,38 @@ package UI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.invoke.StringConcatFactory;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import DataModels.Product;
+import DataModels.ProductCSVWriter;
 import Services.PricingService;
 
 
 public class Jflame_dashboard_order extends JFrame {
 
     private DefaultTableModel cartTableModel;
-    private DefaultTableModel productTableModel; // เพิ่ม: Model สำหรับตารางสินค้า
-    private List<DataModels.Product> productList; // เพิ่ม: รายการสินค้าทั้งหมดที่โหลดจาก CSV
+    private DefaultTableModel productTableModel; // Model สำหรับตารางสินค้า
+    private List<DataModels.Product> productList; // รายการสินค้าทั้งหมดที่โหลดจาก CSV
     private JLabel subtotalLabel;
     private JLabel taxLabel;
     private JLabel totalLabel;
     private JTextField searchField;
     private double currentDiscount = 0.0; // ตัวแปรเก็บส่วนลดปัจจุบัน
     private JLabel discountLabel; // Label สำหรับแสดงส่วนลด
-    private JTable cartTable; // เพิ่ม: ตัวแปร JTable สำหรับตะกร้า
+    private JTable cartTable; // ตัวแปร JTable สำหรับตะกร้า
     private PricingService pricingService = new PricingService();
-
     public Jflame_dashboard_order(){
 
         setTitle("Point of Sale");
@@ -106,7 +115,7 @@ public class Jflame_dashboard_order extends JFrame {
                 Color.DARK_GRAY)));
         
         
-        // 1. สร้างส่วนค้นหาสินค้า (Search Panel)
+        // สร้างส่วนค้นหาสินค้า (Search Panel)
         JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
         searchPanel.setBackground(panelColor);
         searchPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
@@ -116,7 +125,7 @@ public class Jflame_dashboard_order extends JFrame {
         searchPanel.add(new JLabel("Search Product or Scan Barcode"), BorderLayout.NORTH);
         searchPanel.add(searchField, BorderLayout.CENTER);
 
-        // 2. สร้างตารางแสดงสินค้า (Product List Table)
+        // สร้างตารางแสดงสินค้า (Product List Table)
         String[] productColumnNames = {"SKU", "Name", "Price"};
         productTableModel = new DefaultTableModel(productColumnNames, 0) {
             @Override
@@ -146,7 +155,8 @@ public class Jflame_dashboard_order extends JFrame {
             }
         });
 
-        // 3. สร้าง Action Panel (ปุ่ม Add/Delete)
+
+        // สร้าง Action Panel (ปุ่ม Add/Delete)
         JPanel actionPanel = new JPanel(new GridLayout(1, 2, 10, 10)); 
         actionPanel.setBackground(panelColor);
         actionPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -178,12 +188,12 @@ public class Jflame_dashboard_order extends JFrame {
         actionPanel.add(deleteButton);
         actionPanel.add(deleteButton);
         
-        // 4. จัดเรียงส่วนประกอบ
+        // จัดเรียงส่วนประกอบ
         panel.add(searchPanel, BorderLayout.NORTH);
         panel.add(productScrollPane, BorderLayout.CENTER); // ตารางอยู่ตรงกลาง
         panel.add(actionPanel, BorderLayout.SOUTH); // ปุ่มอยู่ด้านล่าง
         
-        // 5. โหลดข้อมูลสินค้าเมื่อสร้าง Panel เสร็จ
+        // โหลดข้อมูลสินค้าเมื่อสร้าง Panel เสร็จ
         loadProductsFromCSV();
         
         return panel;
@@ -233,10 +243,9 @@ public class Jflame_dashboard_order extends JFrame {
     panel.setBorder(BorderFactory.createCompoundBorder(
         BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
         new EmptyBorder(10, 10, 10, 10)));
-        
-    // -----------------------------------------------------------------
-    // 1. สร้าง Panel สำหรับแสดงยอดรวม (Totals Panel) โดยใช้ GridBagLayout
-    // -----------------------------------------------------------------
+
+    
+    // สร้าง Panel สำหรับแสดงยอดรวม (Totals Panel) โดยใช้ GridBagLayout
     JPanel totalsPanel = new JPanel(new GridBagLayout());
     totalsPanel.setBackground(panelColor);
     GridBagConstraints gbc = new GridBagConstraints();
@@ -280,9 +289,7 @@ public class Jflame_dashboard_order extends JFrame {
     centerWrap.setBackground(panelColor);
     centerWrap.add(totalsPanel, BorderLayout.NORTH);
     
-    // -----------------------------------------------------------------
-    // 2. สร้าง Button Panel
-    // -----------------------------------------------------------------
+    // สร้าง Button Panel
     JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 10, 10)); // 2x2
     buttonPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
     buttonPanel.setBackground(panelColor);
@@ -316,8 +323,7 @@ public class Jflame_dashboard_order extends JFrame {
     });
     buttonPanel.add(codeButton);
     
-    // 3. จัดเรียง Panel หลัก
-    // -----------------------------------------------------------------
+    // จัดเรียง Panel หลัก
     panel.add(centerWrap, BorderLayout.CENTER);
     panel.add(buttonPanel, BorderLayout.SOUTH);
     
@@ -340,68 +346,92 @@ public class Jflame_dashboard_order extends JFrame {
     
     // เมทอดสำหรับเพิ่มสินค้าลงในตะกร้า
     private void addProductToCart(String productID) {
-        
-        DataModels.Product selectedProduct = null;
-        if (productList != null) {
-            for (DataModels.Product product : productList) {
-                // ต้องเปรียบเทียบ SKU ด้วย equals
-                if (product.sku().equals(productID)) {
-                    selectedProduct = product;
-                    break;
-                }
-            }
-        }
-        
-        if (selectedProduct == null) {
-            JOptionPane.showMessageDialog(this, "Product ID not found: " + productID, "Not Found", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        String productName = selectedProduct.name();
-        double price = selectedProduct.price();
-        int quantity = 1;
-        double total = quantity * price;
-
-        // Check if the product already exists in the cart to update quantity instead of adding a new row
-        boolean productFound = false;
-        for (int i = 0; i < cartTableModel.getRowCount(); i++) {
-            // ตรวจสอบจากชื่อสินค้าในตะกร้า
-            if (cartTableModel.getValueAt(i, 0).equals(productName)) {
-                // ตรวจสอบให้แน่ใจว่าค่าเป็น Integer
-                int currentQuantity = 0;
-                try {
-                    currentQuantity = (int) cartTableModel.getValueAt(i, 1);
-                } catch (ClassCastException e) {
-                     // พยายามแปลงจาก String หรือ Long หากเป็นไปได้
-                    Object qValue = cartTableModel.getValueAt(i, 1);
-                    if (qValue instanceof String) {
-                        try {
-                            currentQuantity = Integer.parseInt((String) qValue);
-                        } catch (NumberFormatException ignored) {}
-                    }
-                }
-                
-                double currentTotal = (double) cartTableModel.getValueAt(i, 2); // คอลัมน์ Total คือดัชนี 2
-                
-                cartTableModel.setValueAt(currentQuantity + 1, i, 1);
-                cartTableModel.setValueAt(currentTotal + price, i, 2);
-                productFound = true;
+    
+    DataModels.Product selectedProduct = null;
+    if (productList != null) {
+        for (DataModels.Product product : productList) {
+            // ต้องเปรียบเทียบ SKU ด้วย equals
+            if (product.sku().equals(productID)) {
+                selectedProduct = product;
                 break;
             }
         }
-
-        if (!productFound) {
-            // เพิ่มสินค้าใหม่เข้าตะกร้า: List(name), Quantity(int), Total(double)
-            // ใช้ price ในการคำนวณ total (quantity=1 * price)
-            cartTableModel.addRow(new Object[]{productName, quantity, total});
-        }
-        
-        // เมื่อเพิ่มสินค้าใหม่หรืออัปเดต ต้องรีเซ็ตส่วนลด
-        currentDiscount = 0.0;
-        
-        updateTotals();
-        searchField.setText(""); // ล้างช่องค้นหา
     }
+    
+    if (selectedProduct == null) {
+        JOptionPane.showMessageDialog(this, "Product ID not found: " + productID, "Not Found", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+        // ตรวจสอบสต็อก
+    
+    if (selectedProduct.stock() <= 0) {
+        JOptionPane.showMessageDialog(this, 
+            "สินค้าหมด! (Stock: 0) ไม่สามารถเพิ่มสินค้าลงในตะกร้าได้.", 
+            "Out of Stock", 
+            JOptionPane.WARNING_MESSAGE);
+        return; // หยุดการทำงานถ้าสินค้าหมด
+    }
+    
+    String productName = selectedProduct.name();
+    double price = selectedProduct.price();
+    // ดึงสต็อกปัจจุบันของสินค้าเพื่อใช้ตรวจสอบก่อนเพิ่ม (เผื่อมีการเรียกซ้ำ)
+    int availableStock = selectedProduct.stock();
+    
+    int quantity = 1;
+    double total = quantity * price;
+
+    // ตรวจสอบว่าของในตะกร้าไม่ซ้ำกับที่มีอยู่
+    boolean productFound = false;
+    for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+        // ตรวจสอบจากชื่อสินค้าในตะกร้า
+        if (cartTableModel.getValueAt(i, 0).equals(productName)) {
+            
+            // ... (โค้ดดึง currentQuantity เหมือนเดิม) ...
+            int currentQuantity = 0;
+            try {
+                currentQuantity = (int) cartTableModel.getValueAt(i, 1);
+            } catch (ClassCastException e) {
+                Object qValue = cartTableModel.getValueAt(i, 1);
+                if (qValue instanceof String) {
+                    try {
+                        currentQuantity = Integer.parseInt((String) qValue);
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            
+            // =======================================================
+            // *** 2. เพิ่มโค้ดตรวจสอบสต็อกเมื่อมีการเพิ่มซ้ำ ***
+            // =======================================================
+            if (currentQuantity >= availableStock) {
+                 JOptionPane.showMessageDialog(this, 
+                    "เพิ่มสินค้าไม่ได้! จำนวนในตะกร้า (" + currentQuantity + ") เกินสต็อกที่มี (" + availableStock + ").", 
+                    "Stock Limit Reached", 
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            // =======================================================
+            
+            double currentTotal = (double) cartTableModel.getValueAt(i, 2); 
+            
+            cartTableModel.setValueAt(currentQuantity + 1, i, 1);
+            cartTableModel.setValueAt(currentTotal + price, i, 2);
+            productFound = true;
+            break;
+        }
+    }
+
+    if (!productFound) {
+        // ... (โค้ดเพิ่มแถวใหม่เหมือนเดิม) ...
+        cartTableModel.addRow(new Object[]{productName, quantity, total});
+    }
+    
+    // เมื่อเพิ่มสินค้าใหม่หรืออัปเดต ต้องรีเซ็ตส่วนลด
+    currentDiscount = 0.0;
+    
+    updateTotals();
+    searchField.setText(""); // ล้างช่องค้นหา
+}
 
 // เมทอดสำหรับอัปเดตยอดรวมทั้งหมด
 private void updateTotals() {
@@ -409,7 +439,7 @@ private void updateTotals() {
     
     // ตรวจสอบว่า cartTableModel ไม่ใช่ null ก่อนใช้งาน
     if (cartTableModel == null) {
-        return; 
+        return;
     }
 
     for (int i = 0; i < cartTableModel.getRowCount(); i++) {
@@ -419,9 +449,7 @@ private void updateTotals() {
              subtotal += (double) cartTableModel.getValueAt(i, 2); 
         } catch (ClassCastException | NullPointerException e) {
              System.err.println("Error reading total amount from row " + i + ". Data might not be a double. Value: " + cartTableModel.getValueAt(i, 2));
-             // แจ้งเตือนในกรณีที่ข้อมูลผิดพลาด
-             // JOptionPane.showMessageDialog(this, "Internal Error: Cart data type mismatch. Check console.", "Data Error", JOptionPane.ERROR_MESSAGE);
-             // ควรทำให้ปลอดภัยขึ้นโดยพยายามแปลงค่าหากเป็น String
+             
              Object totalValue = cartTableModel.getValueAt(i, 2);
              if (totalValue instanceof String) {
                  try {
@@ -431,7 +459,6 @@ private void updateTotals() {
         }
     }
     
-    // 💡 แก้ไข: ใช้ currentDiscount ของคลาส
     double discountApplied = currentDiscount;
     
     double effectiveSubtotal = subtotal - discountApplied;
@@ -460,7 +487,16 @@ private void updateTotals() {
             return;
         }
 
-        // Display a confirmation dialog and reset the cart upon successful payment
+        // ดึงยอดรวมสุดท้ายก่อนทำการชำระ
+        String totalText = totalLabel.getText().replace("฿", "").replace(",", "");
+        double totalAmount = 0.0;
+        try {
+            totalAmount = Double.parseDouble(totalText);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Error processing total amount. Please try again.", "Payment Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        // ยืนยันการชำระเงิน
         int response = JOptionPane.showConfirmDialog(this,
                 "Confirm payment of " + totalLabel.getText() + " with " + paymentMethod + "?",
                 "Confirm Payment",
@@ -468,20 +504,60 @@ private void updateTotals() {
                 JOptionPane.QUESTION_MESSAGE);
 
         if (response == JOptionPane.YES_OPTION) {
-            JOptionPane.showMessageDialog(this, "Payment successful! The transaction has been completed.", "Payment Success", JOptionPane.INFORMATION_MESSAGE);
+            
+            // ลดสต็อกสินค้าใน productList 
+            for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+                String productName = (String) cartTableModel.getValueAt(i, 0);
+                int quantitySold = 0;
+                try {
+                    quantitySold = (int) cartTableModel.getValueAt(i, 1); 
+                    this.saveproduct_sold(productName, quantitySold);
+                } catch (Exception ex) {
+                    Object qValue = cartTableModel.getValueAt(i, 1);
+                    if (qValue instanceof String) {
+                        try {
+                            quantitySold = Integer.parseInt((String) qValue);
+                        } catch (NumberFormatException ignored) {}
+                    }
+                
+                }
+                
+                // ค้นหาสินค้าและลดสต็อก
+                for (int j = 0; j < productList.size(); j++) {
+                    DataModels.Product p = productList.get(j);
+                    if (p.name().equals(productName)) {
+                        
+                        int newStock = p.stock() - quantitySold;
+                        if (newStock < 0) newStock = 0; 
+                        
+                        // สร้าง Product ใหม่และอัปเดต List
+                        productList.set(j, new DataModels.Product(p.sku(), p.name(), p.price(), newStock));
+                        break;
+                    }
+                }
+                
+            }
+            
+            // บันทึกการเปลี่ยนแปลงสต็อกกลับไปที่ CSV
+            saveProductsToCSV();
+            
+            // บันทึกรายการขาย (Transaction) ลงใน daily_report.csv
+            saveSaleTransactionToCSV(totalAmount);
+
+            JOptionPane.showMessageDialog(this, "Payment successful! The transaction has been completed, stock updated, and sale recorded.", "Payment Success", JOptionPane.INFORMATION_MESSAGE);
             
             // Clear the cart and reset totals
             cartTableModel.setRowCount(0);
-            currentDiscount = 0.0; // รีเซ็ตส่วนลด
+            currentDiscount = 0.0;
             updateTotals();
+            
+            // โหลดข้อมูลสินค้าใหม่ในตารางสินค้าเพื่อแสดงสต็อกที่อัปเดตแล้ว ***
+            loadProductsFromCSV();
         }
     }
-// -----------------------------------------------------------------
-    // เมทอดใหม่: โหลดสินค้าจาก CSV และเติมลงในตาราง
-    // -----------------------------------------------------------------
+    // โหลดสินค้าจาก CSV และเติมลงในตาราง
     private void loadProductsFromCSV() {
-        // ใช้ ProductCSVReader ที่ผู้ใช้เตรียมไว้
-        // NOTE: ต้องแน่ใจว่าคลาส DataModels และ ProductCSVReader มีอยู่ในโปรเจกต์
+        
         DataModels.ProductCSVReader reader = new DataModels.ProductCSVReader();
         productList = reader.readProductsFromCSV(); // อ่านข้อมูลทั้งหมด
         
@@ -502,7 +578,7 @@ private void updateTotals() {
     }
 
 private void applyDiscountCode(String code) {
-    // 1. คำนวณ Subtotal ปัจจุบัน
+    // คำนวณ Subtotal ปัจจุบัน
     double subtotal = 0.0;
     for (int i = 0; i < cartTableModel.getRowCount(); i++) {
         // ดัชนี 2 คือ Total
@@ -522,7 +598,7 @@ private void applyDiscountCode(String code) {
     double oldDiscount = currentDiscount;
     currentDiscount = 0.0; // สมมติว่าโค้ดใหม่จะล้างโค้ดเก่าเสมอ
     
-    // 2. คำนวณส่วนลดโดยใช้ PricingService
+    // คำนวณส่วนลดโดยใช้ PricingService
     double calculatedDiscount = pricingService.calDiscount(subtotal, code);
 
     if (calculatedDiscount > 0.0) {
@@ -532,16 +608,16 @@ private void applyDiscountCode(String code) {
         // ตรวจสอบชนิดของส่วนลดเพื่อแสดงข้อความที่เหมาะสม (อิงตาม logic ของ PricingService)
         String discountMessage;
         if (code.equalsIgnoreCase("SALE20")) {
-             discountMessage = " (20% off on subtotal)";
+            discountMessage = " (20% off on subtotal)";
         } else if (code.equalsIgnoreCase("TENOFF")) {
-             discountMessage = " (฿10.00 off)";
+            discountMessage = " (฿10.00 off)";
         } else {
-             discountMessage = ""; // ใช้ในกรณีที่มีโค้ดอื่นๆ เพิ่มเติม
+            discountMessage = ""; // ใช้ในกรณีที่มีโค้ดอื่นๆ เพิ่มเติม
         }
 
-        JOptionPane.showMessageDialog(this, 
-            "Discount code '" + code + "' applied successfully!" + discountMessage, 
-            "Success", 
+        JOptionPane.showMessageDialog(this,
+            "Discount code '" + code + "' applied successfully!" + discountMessage,
+            "Success",
             JOptionPane.INFORMATION_MESSAGE);
             
         updateTotals(); // อัปเดตยอดรวม
@@ -575,5 +651,79 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
     valueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
     parent.add(valueLabel, gbc);
 }
+
+/**
+     * เมทอดสำหรับบันทึกสินค้ากลับไปยัง CSV
+     * ต้องมีการสร้างคลาส ProductCSVWriter ที่มีเมทอด writeProductsToCSV(List<Product>)
+     */
+    private void saveProductsToCSV() {
+        if (productList != null) {
+            try {
+                ProductCSVWriter writer = new ProductCSVWriter(); 
+                writer.writeAllProductsToCSV(productList);
+            } catch (Exception e) {
+                // จัดการข้อผิดพลาดในการบันทึกไฟล์
+                JOptionPane.showMessageDialog(this, "Error saving product data to CSV: " + e.getMessage(), "Save Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
+    /**
+     * เมทอดสำหรับบันทึกรายการขายใหม่ต่อท้ายไฟล์ daily_report.csv
+     * รูปแบบที่บันทึกคือ: orderId,cost,date
+     */
+    private void saveSaleTransactionToCSV(double totalAmount) {
+        String filePath = "./FileCSV/daily_report.csv";
+        
+        try (FileWriter fw = new FileWriter(filePath, true); // true คือโหมด append (เขียนต่อท้าย)
+            PrintWriter pw = new PrintWriter(fw)) {
+            // สร้าง Order ID และ Date
+            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String date = LocalDateTime.now().toLocalDate().toString();
+            String line = String.format("%s,%.2f,%s", orderId, totalAmount, date);
+            
+            // เขียนลงไฟล์
+            pw.println(line);
+            
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error saving sale transaction to daily report CSV: " + e.getMessage(), 
+                "Save Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+    private void saveproduct_sold(String product_Name,int quantity){
+        String CSV_FILE = "./FileCSV/Product_sold.csv"; 
+        String CSV_HEADER = "OrderID,Date,Name,Quantity";
+         File file = new File(CSV_FILE);
+          FileWriter fw=null;
+          BufferedWriter bw=null;
+          boolean checkHeader=!file.exists()||file.length() == 0;
+        try{
+            fw=new FileWriter(file,true);
+            bw=new BufferedWriter(fw);
+            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String date=LocalDateTime.now().toLocalDate().toString();
+            String line=String.format("%s,%s,%s,%d", orderID, date, product_Name, quantity);
+            if(checkHeader){
+                bw.write(CSV_HEADER);
+                bw.newLine();
+            }
+            
+            bw.write(line);
+            bw.newLine();
+            
+        } catch (IOException e) {
+            System.err.println("Error writing all products to CSV file: " + e.getMessage());
+        }finally{
+            try {
+                bw.close();
+                fw.close();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+    }
+
 
 }

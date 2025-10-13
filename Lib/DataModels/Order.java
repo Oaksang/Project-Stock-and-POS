@@ -3,7 +3,6 @@ package DataModels;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// get getSubtotal ยังไม่ได้ทำ
 public class Order {
     private String OrderId;
     private LocalDateTime timestamp;

@@ -53,4 +53,11 @@ public class ProductCSVReader {
         }
         return products;
     }
+
+    public List<String[]> readSaleFromCSV() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'readSaleFromCSV'");
+    }
+
 }
+    
