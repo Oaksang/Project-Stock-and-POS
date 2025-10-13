@@ -62,8 +62,8 @@ public class Jflame_dashboard_order extends JFrame {
         }
 
         // กำหนดโทนสีที่ทันสมัยและดูสบายตา
-        Color backgroundColor = new Color(240, 242, 245); // สีเทาอ่อนสำหรับพื้นหลัง
-        Color panelColor = Color.WHITE; // สีขาวสำหรับแผงหลัก
+        Color backgroundColor = Color.WHITE; // สีขาวสำหรับพื้นหลัง
+        Color panelColor = new Color(216,191,216); // สีเหลืองครีมพาสเทลสำหรับแผงหลัก
         Color accentColor = new Color(0, 123, 255); // สีน้ำเงินสำหรับปุ่มและเน้นข้อความ
 
         getContentPane().setBackground(backgroundColor);
@@ -101,7 +101,7 @@ public class Jflame_dashboard_order extends JFrame {
     // สร้างหน้าต่าง Panel หลักทั้งหมด
     private JPanel createMainPanel(Color panelColor, Color accentColor) {
         JPanel mainPanel = new JPanel(new GridLayout(1, 3, 15, 0)); // เพิ่มระยะห่างระหว่างคอลัมน์
-        
+        mainPanel.setBackground(Color.WHITE);
         JPanel productPanel = createProductPanel(panelColor, accentColor); // แผงสินค้า
         JPanel shoppingCartPanel = createShoppingCartPanel(panelColor); // ตะกร้าสินค้า
         JPanel totalPanel = createTotalPanel(panelColor, accentColor); // ยอดรวมและการชำระเงิน
@@ -122,7 +122,7 @@ public class Jflame_dashboard_order extends JFrame {
             BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Product Information", 
                 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                 javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                new Font("Tahoma", Font.BOLD, 14), 
+                new Font("Garamond", Font.BOLD, 14), 
                 Color.DARK_GRAY)));
         
         
@@ -132,7 +132,8 @@ public class Jflame_dashboard_order extends JFrame {
         searchPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
 
         searchField = new JTextField();
-        searchField.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        searchField.setBackground(new Color(250,248,228));
+        searchField.setFont(new Font("Garamond", Font.PLAIN, 14));
         searchPanel.add(new JLabel("Search Product or Scan Barcode"), BorderLayout.NORTH);
         searchPanel.add(searchField, BorderLayout.CENTER);
 
@@ -144,10 +145,12 @@ public class Jflame_dashboard_order extends JFrame {
                  return false; // ห้ามแก้ไขข้อมูลในตารางสินค้า
             }
         };
+
         JTable productTable = new JTable(productTableModel);
         productTable.setFillsViewportHeight(true);
-        productTable.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        productTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
+        productTable.setBackground(new Color(250,248,228 ));
+        productTable.setFont(new Font("Garamond", Font.PLAIN, 12));
+        productTable.getTableHeader().setFont(new Font("Garamond", Font.BOLD, 12));
         
         JScrollPane productScrollPane = new JScrollPane(productTable);
         productScrollPane.setBorder(new EmptyBorder(0, 10, 0, 10)); // เพิ่มช่องว่างด้านข้าง
@@ -173,6 +176,22 @@ public class Jflame_dashboard_order extends JFrame {
         actionPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     
         JButton manualEnterButton = createStyledButton("Add Product by ID", accentColor, Color.WHITE);
+        manualEnterButton.setBackground(new Color(185,150,205)); 
+        manualEnterButton.setForeground(Color.WHITE); 
+        manualEnterButton.setBorderPainted(false);
+
+        // เพิ่ม action เวลากดปุ่ม (add)
+        manualEnterButton.getModel().addChangeListener(e -> {
+        ButtonModel m = manualEnterButton.getModel();
+            if (m.isPressed()) {
+            manualEnterButton.setBackground(new Color(140,100,165));
+            } else if (m.isRollover()) {
+            manualEnterButton.setBackground(new Color(160,120,180));
+            } else {
+            manualEnterButton.setBackground(new Color(185,150,205));
+            }
+        });
+
         manualEnterButton.addActionListener(e -> {
             String productID = searchField.getText().trim(); 
             if (!productID.isEmpty()) {
@@ -184,6 +203,22 @@ public class Jflame_dashboard_order extends JFrame {
         });
         actionPanel.add(manualEnterButton);
         JButton deleteButton = createStyledButton("Delete Item from Cart", new Color(220, 53, 69), Color.WHITE);
+        deleteButton.setBackground(new Color(185,150,205)); 
+        deleteButton.setForeground(Color.WHITE); 
+        deleteButton.setBorderPainted(false);
+
+        // เพิ่ม action เวลากดปุ่ม (delete)
+        deleteButton.getModel().addChangeListener(e -> {
+        ButtonModel d = deleteButton.getModel();
+            if (d.isPressed()) {
+            deleteButton.setBackground(new Color(140,100,165));
+            } else if (d.isRollover()) {
+            deleteButton.setBackground(new Color(160,120,180));
+            } else {
+            deleteButton.setBackground(new Color(185,150,205));
+            }
+        });
+
         deleteButton.addActionListener(e -> {
             // โค้ดสำหรับลบสินค้าในตะกร้า (Cart)
             int selectedRow = cartTable.getSelectedRow();
@@ -220,7 +255,7 @@ public class Jflame_dashboard_order extends JFrame {
             BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Shopping carts", 
                 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                 javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                new Font("Tahoma", Font.BOLD, 14), 
+                new Font("Garamond", Font.BOLD, 14), 
                 Color.DARK_GRAY)));
 
         String[] columnNames = {"List", "Quantity", "Total"};
@@ -236,8 +271,9 @@ public class Jflame_dashboard_order extends JFrame {
         
         // ปรับปรุงรูปลักษณ์ของตาราง
         cartTable.setFillsViewportHeight(true);
-        cartTable.setFont(new Font("Tahoma", Font.PLAIN, 12));
-        cartTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
+        cartTable.setBackground(new Color(250,248,228 ));
+        cartTable.setFont(new Font("Garamond", Font.PLAIN, 12));
+        cartTable.getTableHeader().setFont(new Font("Garamond", Font.BOLD, 12));
         cartTable.getTableHeader().setBackground(new Color(245, 245, 245));
         
         JScrollPane scrollPane = new JScrollPane(cartTable);
@@ -264,12 +300,12 @@ public class Jflame_dashboard_order extends JFrame {
     gbc.insets = new Insets(5, 5, 5, 5); // ช่องว่างระหว่างแถว
     
     // ตั้งค่าตัวจัดเรียงข้อความ
-    Font labelFont = new Font("Tahoma", Font.BOLD, 14);
-    Font valueFont = new Font("Tahoma", Font.BOLD, 16);
+    Font labelFont = new Font("Garamond", Font.BOLD, 14);
+    Font valueFont = new Font("Garamond", Font.BOLD, 16);
     
     // Helper function สำหรับเพิ่มแถวใน GridBagLayout
     autoAddRow(totalsPanel, gbc, "Subtotal:", labelFont, valueFont, Color.DARK_GRAY, subtotalLabel = new JLabel("฿0.00"));
-    autoAddRow(totalsPanel, gbc, "Discount:", labelFont, valueFont, new Color(220, 53, 69), discountLabel = new JLabel("฿0.00")); // แถวใหม่สำหรับส่วนลด
+    autoAddRow(totalsPanel, gbc, "Discount:", labelFont, valueFont, new Color(255,105,180), discountLabel = new JLabel("฿0.00")); // แถวใหม่สำหรับส่วนลด
     autoAddRow(totalsPanel, gbc, "Tax (7%):", labelFont, valueFont, Color.DARK_GRAY, taxLabel = new JLabel("฿0.00"));
 
     // เส้นคั่นก่อน Total
@@ -283,14 +319,14 @@ public class Jflame_dashboard_order extends JFrame {
     gbc.gridx = 0;
     gbc.gridy++;
     JLabel totalTitle = new JLabel("TOTAL:");
-    totalTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
-    totalTitle.setForeground(accentColor);
+    totalTitle.setFont(new Font("Garamond", Font.BOLD, 18));
+    totalTitle.setForeground(new Color(255, 218, 185));
     gbc.gridwidth = 1; // ต้องตั้งกลับไปเป็น 1 เพื่อให้ช่องขวาจัดชิดขวา
     totalsPanel.add(totalTitle, gbc);
     gbc.gridx = 1;
     totalLabel = new JLabel("฿0.00");
-    totalLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
-    totalLabel.setForeground(accentColor);
+    totalLabel.setFont(new Font("Garamond", Font.BOLD, 22));
+    totalLabel.setForeground(new Color(255, 218, 185));
     totalLabel.setHorizontalAlignment(SwingConstants.RIGHT); // จัดชิดขวา
     totalsPanel.add(totalLabel, gbc);
     
@@ -306,10 +342,45 @@ public class Jflame_dashboard_order extends JFrame {
     
     // ปุ่มต่างๆ
     JButton cashButton = createStyledButton("Cash", accentColor, Color.WHITE);
+    cashButton.setBackground(new Color(185,150,205)); 
+    cashButton.setForeground(Color.WHITE); 
+    cashButton.setFont(new Font("Garamond",Font.BOLD, 16));
+    cashButton.setBorderPainted(false);
     cashButton.addActionListener(e -> processPayment("Cash"));
     buttonPanel.add(cashButton);
 
+    // ปรับให้ปุ่มดูดีเวลากด (cash)
+        cashButton.getModel().addChangeListener(e -> {
+        ButtonModel ca = cashButton.getModel();
+            if (ca.isPressed()) {
+            cashButton.setBackground(new Color(140,100,165));
+            } else if (ca.isRollover()) {
+            // ตอนชี้ (hover)
+            cashButton.setBackground(new Color(160,120,180));
+            } else {
+            cashButton.setBackground(new Color(185,150,205));
+            }
+        });
+
     JButton codeButton = createStyledButton("Use Code", accentColor, Color.WHITE);
+    codeButton.setBackground(new Color(185,150,205)); 
+    codeButton.setForeground(Color.WHITE); 
+    codeButton.setFont(new Font("Garamond",Font.BOLD, 16));
+    codeButton.setBorderPainted(false);
+
+    // ปรับให้ปุ่มดูดีเวลากด (use code)
+        codeButton.getModel().addChangeListener(e -> {
+        ButtonModel co = codeButton.getModel();
+            if (co.isPressed()) {
+            codeButton.setBackground(new Color(140,100,165));
+            } else if (co.isRollover()) {
+            // ตอนชี้ (hover)
+            codeButton.setBackground(new Color(160,120,180));
+            } else {
+            codeButton.setBackground(new Color(185,150,205));
+            }
+        });
+
     codeButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -346,7 +417,7 @@ public class Jflame_dashboard_order extends JFrame {
     // ฟังก์ชันช่วยในการสร้างปุ่มที่มีสไตล์
     private JButton createStyledButton(String text, Color bgColor, Color fgColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Tahoma", Font.BOLD, 14));
+        button.setFont(new Font("Garamond", Font.BOLD, 14));
         button.setBackground(bgColor);
         button.setForeground(fgColor);
         button.setFocusPainted(false);
@@ -375,7 +446,6 @@ public class Jflame_dashboard_order extends JFrame {
     }
 
     // ตรวจสอบสต็อก
-    
     if (selectedProduct.stock() <= 0) {
         JOptionPane.showMessageDialog(this, 
             "Product '" + selectedProduct.name() + "' is out of stock.", 
@@ -386,6 +456,7 @@ public class Jflame_dashboard_order extends JFrame {
     
     String productName = selectedProduct.name();
     double price = selectedProduct.price();
+
     // ดึงสต็อกปัจจุบันของสินค้าเพื่อใช้ตรวจสอบก่อนเพิ่ม (เผื่อมีการเรียกซ้ำ)
     int availableStock = selectedProduct.stock();
     
