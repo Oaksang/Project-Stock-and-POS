@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.invoke.StringConcatFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -17,31 +16,42 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import DataModels.Product;
 import DataModels.ProductCSVWriter;
 import Services.PricingService;
 
-
+/**
+ * JFrame สำหรับหน้าต่าง Point of Sale (POS)
+ * มีฟีเจอร์หลักๆ ดังนี้:
+ * - แสดงรายการสินค้าและค้นหาสินค้า
+ * - เพิ่มสินค้าลงในตะกร้า
+ * - แสดงตะกร้าสินค้าและแก้ไขรายการ
+ * - คำนวณยอดรวม, ภาษี, ส่วนลด
+ * - ประมวลผลการชำระเงิน
+ * - บันทึกรายการขายลงในไฟล์ CSV
+ */
 public class Jflame_dashboard_order extends JFrame {
 
-    private DefaultTableModel cartTableModel;
+    private DefaultTableModel cartTableModel; // Model สำหรับตะกร้า
     private DefaultTableModel productTableModel; // Model สำหรับตารางสินค้า
     private List<DataModels.Product> productList; // รายการสินค้าทั้งหมดที่โหลดจาก CSV
-    private JLabel subtotalLabel;
-    private JLabel taxLabel;
-    private JLabel totalLabel;
-    private JTextField searchField;
+    private JLabel subtotalLabel; // Label สำหรับแสดงยอดรวมย่อย
+    private JLabel taxLabel; // Label สำหรับแสดงภาษี
+    private JLabel totalLabel; // Label สำหรับแสดงยอดรวมทั้งหมด
+    private JTextField searchField; // ช่องค้นหาสินค้า
     private double currentDiscount = 0.0; // ตัวแปรเก็บส่วนลดปัจจุบัน
     private JLabel discountLabel; // Label สำหรับแสดงส่วนลด
     private JTable cartTable; // ตัวแปร JTable สำหรับตะกร้า
-    private PricingService pricingService = new PricingService();
+    private PricingService pricingService = new PricingService(); // บริการคำนวณราคาและส่วนลด
+
+    // Constructor
     public Jflame_dashboard_order(){
 
+        // การตั้งค่าพื้นฐานของ JFrame
         setTitle("Point of Sale");
         setSize(1000, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // จัดให้อยู่กึ่งกลางหน้าจอ
-        setIconImage(new ImageIcon("MRDRY_logo.png").getImage());
+        setIconImage(new ImageIcon("./picture/MRDRY_logo.png").getImage());
         
 
         // ใช้ Look and Feel ของระบบปฏิบัติการเพื่อให้ดูเป็นธรรมชาติ
@@ -59,6 +69,7 @@ public class Jflame_dashboard_order extends JFrame {
         getContentPane().setBackground(backgroundColor);
         setLayout(new BorderLayout(15, 15)); // เพิ่มระยะห่างระหว่างส่วนประกอบหลัก
         
+        // เมนูบาร์ด้านบน
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem exitItem = new JMenuItem("Go to Dashboard");
@@ -91,9 +102,9 @@ public class Jflame_dashboard_order extends JFrame {
     private JPanel createMainPanel(Color panelColor, Color accentColor) {
         JPanel mainPanel = new JPanel(new GridLayout(1, 3, 15, 0)); // เพิ่มระยะห่างระหว่างคอลัมน์
         
-        JPanel productPanel = createProductPanel(panelColor, accentColor);
-        JPanel shoppingCartPanel = createShoppingCartPanel(panelColor);
-        JPanel totalPanel = createTotalPanel(panelColor, accentColor);
+        JPanel productPanel = createProductPanel(panelColor, accentColor); // แผงสินค้า
+        JPanel shoppingCartPanel = createShoppingCartPanel(panelColor); // ตะกร้าสินค้า
+        JPanel totalPanel = createTotalPanel(panelColor, accentColor); // ยอดรวมและการชำระเงิน
         
         mainPanel.add(productPanel);
         mainPanel.add(shoppingCartPanel);
@@ -102,7 +113,7 @@ public class Jflame_dashboard_order extends JFrame {
         return mainPanel;
     }
 
-
+    // แสดงรายการสินค้าและค้นหาสินค้า
     private JPanel createProductPanel(Color panelColor, Color accentColor) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(panelColor);
@@ -120,7 +131,7 @@ public class Jflame_dashboard_order extends JFrame {
         searchPanel.setBackground(panelColor);
         searchPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
 
-        searchField = new JTextField(); 
+        searchField = new JTextField();
         searchField.setFont(new Font("Tahoma", Font.PLAIN, 14));
         searchPanel.add(new JLabel("Search Product or Scan Barcode"), BorderLayout.NORTH);
         searchPanel.add(searchField, BorderLayout.CENTER);
@@ -189,7 +200,7 @@ public class Jflame_dashboard_order extends JFrame {
         actionPanel.add(deleteButton);
         
         // จัดเรียงส่วนประกอบ
-        panel.add(searchPanel, BorderLayout.NORTH);
+        panel.add(searchPanel, BorderLayout.NORTH); // ช่องค้นหาอยู่ด้านบน
         panel.add(productScrollPane, BorderLayout.CENTER); // ตารางอยู่ตรงกลาง
         panel.add(actionPanel, BorderLayout.SOUTH); // ปุ่มอยู่ด้านล่าง
         
@@ -275,8 +286,7 @@ public class Jflame_dashboard_order extends JFrame {
     totalTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
     totalTitle.setForeground(accentColor);
     gbc.gridwidth = 1; // ต้องตั้งกลับไปเป็น 1 เพื่อให้ช่องขวาจัดชิดขวา
-    totalsPanel.add(totalTitle, gbc); 
-
+    totalsPanel.add(totalTitle, gbc);
     gbc.gridx = 1;
     totalLabel = new JLabel("฿0.00");
     totalLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
@@ -358,16 +368,17 @@ public class Jflame_dashboard_order extends JFrame {
         }
     }
     
+    // ตรวจสอบว่าพบสินค้าหรือไม่
     if (selectedProduct == null) {
         JOptionPane.showMessageDialog(this, "Product ID not found: " + productID, "Not Found", JOptionPane.WARNING_MESSAGE);
         return;
     }
 
-        // ตรวจสอบสต็อก
+    // ตรวจสอบสต็อก
     
     if (selectedProduct.stock() <= 0) {
         JOptionPane.showMessageDialog(this, 
-            "สินค้าหมด! (Stock: 0) ไม่สามารถเพิ่มสินค้าลงในตะกร้าได้.", 
+            "Product '" + selectedProduct.name() + "' is out of stock.", 
             "Out of Stock", 
             JOptionPane.WARNING_MESSAGE);
         return; // หยุดการทำงานถ้าสินค้าหมด
@@ -399,23 +410,19 @@ public class Jflame_dashboard_order extends JFrame {
                     } catch (NumberFormatException ignored) {}
                 }
             }
-            
-            // =======================================================
-            // *** 2. เพิ่มโค้ดตรวจสอบสต็อกเมื่อมีการเพิ่มซ้ำ ***
-            // =======================================================
+            //  เพิ่มโค้ดตรวจสอบสต็อกเมื่อมีการเพิ่มซ้ำ
             if (currentQuantity >= availableStock) {
-                 JOptionPane.showMessageDialog(this, 
-                    "เพิ่มสินค้าไม่ได้! จำนวนในตะกร้า (" + currentQuantity + ") เกินสต็อกที่มี (" + availableStock + ").", 
-                    "Stock Limit Reached", 
+                 JOptionPane.showMessageDialog(this,
+                    "Cannot add more of '" + productName + "'. Available stock: " + availableStock, 
+                    "Stock Limit Reached",
                     JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            // =======================================================
             
             double currentTotal = (double) cartTableModel.getValueAt(i, 2); 
             
-            cartTableModel.setValueAt(currentQuantity + 1, i, 1);
-            cartTableModel.setValueAt(currentTotal + price, i, 2);
+            cartTableModel.setValueAt(currentQuantity + 1, i, 1); // อัปเดตจำนวน
+            cartTableModel.setValueAt(currentTotal + price, i, 2); // อัปเดตยอดรวม
             productFound = true;
             break;
         }
@@ -482,11 +489,11 @@ private void updateTotals() {
 
     // เมทอดสำหรับประมวลผลการชำระเงิน
     private void processPayment(String paymentMethod) {
+        // ตรวจสอบว่าตะกร้าไม่ว่างเปล่า
         if (cartTableModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Shopping cart is empty. Please add products first.", "Payment Failed", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         // ดึงยอดรวมสุดท้ายก่อนทำการชำระ
         String totalText = totalLabel.getText().replace("฿", "").replace(",", "");
         double totalAmount = 0.0;
@@ -555,6 +562,7 @@ private void updateTotals() {
             loadProductsFromCSV();
         }
     }
+
     // โหลดสินค้าจาก CSV และเติมลงในตาราง
     private void loadProductsFromCSV() {
         
@@ -577,26 +585,27 @@ private void updateTotals() {
         }
     }
 
-private void applyDiscountCode(String code) {
-    // คำนวณ Subtotal ปัจจุบัน
-    double subtotal = 0.0;
-    for (int i = 0; i < cartTableModel.getRowCount(); i++) {
-        // ดัชนี 2 คือ Total
-        try {
-            subtotal += (double) cartTableModel.getValueAt(i, 2); 
-        } catch (ClassCastException e) {
-             Object totalValue = cartTableModel.getValueAt(i, 2);
-             if (totalValue instanceof String) {
-                 try {
-                     subtotal += Double.parseDouble((String) totalValue);
-                 } catch (NumberFormatException ignored) {}
-             }
+    // เมทอดสำหรับใช้โค้ดส่วนลด
+    private void applyDiscountCode(String code) {
+        // คำนวณ Subtotal ปัจจุบัน
+        double subtotal = 0.0;
+            for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+            // ดัชนี 2 คือ Total
+            try {
+                subtotal += (double) cartTableModel.getValueAt(i, 2); 
+            } catch (ClassCastException e) {
+                Object totalValue = cartTableModel.getValueAt(i, 2);
+                if (totalValue instanceof String) {
+                    try {
+                    subtotal += Double.parseDouble((String) totalValue);
+                } catch (NumberFormatException ignored) {}
+            }
         }
     }
     
     // รีเซ็ตส่วนลดก่อน
     double oldDiscount = currentDiscount;
-    currentDiscount = 0.0; // สมมติว่าโค้ดใหม่จะล้างโค้ดเก่าเสมอ
+    currentDiscount = 0.0; // โค้ดใหม่จะล้างโค้ดเก่าเสมอ
     
     // คำนวณส่วนลดโดยใช้ PricingService
     double calculatedDiscount = pricingService.calDiscount(subtotal, code);
@@ -632,6 +641,7 @@ private void applyDiscountCode(String code) {
     }
 }
 
+// ฟังก์ชันช่วยในการเพิ่มแถวใน GridBagLayout
 private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Font titleFont, Font valueFont, Color valueColor, JLabel valueLabel) {
     gbc.gridy++;
     
@@ -692,6 +702,8 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
             e.printStackTrace();
         }
     }
+
+    // เมทอดสำหรับบันทึกสินค้าที่ขายลงในไฟล์ Product_sold.csv
     private void saveproduct_sold(String product_Name,int quantity){
         String CSV_FILE = "./FileCSV/Product_sold.csv"; 
         String CSV_HEADER = "OrderID,Date,Name,Quantity";
@@ -702,7 +714,7 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
         try{
             fw=new FileWriter(file,true);
             bw=new BufferedWriter(fw);
-            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             String date=LocalDateTime.now().toLocalDate().toString();
             String line=String.format("%s,%s,%s,%d", orderID, date, product_Name, quantity);
             if(checkHeader){

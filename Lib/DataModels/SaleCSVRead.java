@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+/**
+ * class ที่ใช้ในการอ่านข้อมูลการขายสินค้าจากไฟล์ CSV
+ * @param ไม่มี
+ * @return ข้อมูลการขายสินค้ารายวันในรูปแบบ List ของ String array
+ */
 public class SaleCSVRead {
     File f=new File("./FileCSV/daily_report.csv");
     FileReader fr=null;
@@ -42,10 +47,5 @@ public class SaleCSVRead {
     }
        return record;
     }
-    public static void main(String[] args) {
-        SaleCSVRead a=new SaleCSVRead();
-        List <String[]> b=a.readSaleFromCSV();
-        for(String[] s: b)
-        System.out.println(Arrays.toString(s));
-    }
+
 }

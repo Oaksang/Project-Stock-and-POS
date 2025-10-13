@@ -1,5 +1,10 @@
 package DataModels;
 
+/**
+ * class ที่ใช้เก็บข้อมูลสินค้า
+ * @param sku รหัสสินค้า , name ชื่อสินค้า , price ราคาต่อหน่วย , stock จำนวนสินค้าในคลัง
+ * @return รหัสสินค้า, ชื่อสินค้า, ราคาต่อหน่วย, จำนวนสินค้าในคลัง
+ */
 public class Product {
 
     // sku = รหัสสินค้า , name = ชื่อสินค้า , price = ราคาต่อหน่วย , stock = จำนวนสินค้าในคลัง
@@ -20,7 +25,7 @@ public class Product {
         this.stock = stock;
     }
 
-    // Getters
+    // Methods รับค่าต่างๆ
     public String sku() {
         return sku;
     }
@@ -34,6 +39,7 @@ public class Product {
         return stock;
     }
     
+    // Method สำหรับปรับปรุงจำนวนสินค้าในคลัง
     public void setStock(int stock) {
         if (stock < 0) throw new RuntimeException("Stock should be >= 0");
         this.stock = stock;
