@@ -3,35 +3,37 @@ package Services;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 import DataModels.SaleRecord;
 
 public class ReportingService {
-    private static final String CSV_HEADER = "OrderId,Cost,Date";
+    private static final String CSV_HEADER = "OrderId,Cost,Date"; // หัวข้อของไฟล์ CSV
     ArrayList<SaleRecord> saleRecords ;
 
+    // Constructor
     public ReportingService() {
         saleRecords = new ArrayList<>();
     }
 
+    // บันทึกข้อมูลการขายสินค้าในแต่ละวัน โดยรับข้อมูลเป็น SaleRecord
     public void appendSaleRecord(SaleRecord saleRecord) {
         if (saleRecord == null) throw new RuntimeException("SaleRecord is unknown");
         saleRecords.add(saleRecord);
     }
 
+    // สรุปยอดขายทั้งหมดในแต่ละวัน
     public double summarizeDailySales(LocalDate date) {
         double totalSales = saleRecords.stream()
                 .filter(record -> record.getSaleTime().equals(date))
                 .mapToDouble(SaleRecord::getTotal)
                 .sum();
-        //System.out.println("Total sales for " + date + ": $" + totalSales);
         return totalSales;
     }
+
+    // สร้างรายงานการขายสินค้าในรูปแบบ CSV
     public void writeReportToFile(String filename,LocalDate date){
-        // Implement file writing logic here
         File f = new File(filename);
         FileWriter fw = null;
         BufferedWriter bw = null;
@@ -58,16 +60,5 @@ public class ReportingService {
                 }
             }
     }
-    // Test ReportingService class
-    public static void main(String[] args) {
-        ReportingService reportingService = new ReportingService();
-        SaleRecord saleRecord1 = new SaleRecord("O001",1234.56,
-                1000.00,50.00,70.00,1020.00,"Cash","SALE20");
-        SaleRecord saleRecord2 = new SaleRecord("O002",789.10,
-                700.00,20.00,30.00,710.00,"Credit Card","NEW10");
-        reportingService.appendSaleRecord(saleRecord1);
-        reportingService.appendSaleRecord(saleRecord2);
-        reportingService.summarizeDailySales(LocalDate.now());
-        reportingService.writeReportToFile("./FileCSV/daily_report.csv", LocalDate.now());
-    }  
+
 }
