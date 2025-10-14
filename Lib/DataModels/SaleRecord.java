@@ -1,12 +1,7 @@
 package DataModels;
 import java.time.LocalDate;
 
-/**
- * class ที่ใช้เก็บข้อมูลการขายสินค้า
- * หน้าที่ของคลาสนี้คือการเก็บข้อมูลการขายสินค้า เช่น รหัสคำสั่งซื้อ, ยอดรวมก่อนหักส่วนลด, ส่วนลด, ภาษี, ยอดรวมหลังหักส่วนลดและบวกภาษี, วิธีการชำระเงิน, รหัสส่วนลดที่ใช้
- * @param orderId รหัสคำสั่งซื้อ , subtotal ยอดรวมก่อนหักส่วนลด , discount ส่วนลด , tax ภาษี , total ยอดรวมหลังหักส่วนลดและบวกภาษี , paymentMethod วิธีการชำระเงิน , discountCode รหัสส่วนลดที่ใช้
- * @return รหัสคำสั่งซื้อ, ยอดรวมก่อนหักส่วนลด, ส่วนลด, ภาษี, ยอดรวมหลังหักส่วนลดและบวกภาษี, วิธีการชำระเงิน, รหัสส่วนลดที่ใช้
- */
+
 public class SaleRecord {
     private String orderId;
     private double totalSales;
@@ -15,10 +10,9 @@ public class SaleRecord {
     private final double discount;
     private final double tax;
     private final double total;
-    private final String paymentMethod;
+    private final String paymentMethod; 
     private final String discountCode;
 
-    // Constructor
     public SaleRecord(String orderId,double totalSales,double subtotal,double discount,double tax,double total,String paymentMethod,String discountCode) {
         if (orderId == null || orderId.isEmpty()) throw new RuntimeException("orderId is unknown");
         if (subtotal < 0 || discount < 0 || tax < 0 || total < 0)
@@ -34,7 +28,7 @@ public class SaleRecord {
 
     }
 
-    // Methods รับค่าต่างๆ
+    // Getters
     public String getOrderId() {
         return orderId;
     }

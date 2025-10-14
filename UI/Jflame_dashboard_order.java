@@ -16,44 +16,30 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import DataModels.Product;
-import DataModels.ProductCSVReader;
 import DataModels.ProductCSVWriter;
 import Services.PricingService;
 
-/**
- * JFrame สำหรับหน้าต่าง Point of Sale (POS)
- * มีฟีเจอร์หลักๆ ดังนี้:
- * - แสดงรายการสินค้าและค้นหาสินค้า
- * - เพิ่มสินค้าลงในตะกร้า
- * - แสดงตะกร้าสินค้าและแก้ไขรายการ
- * - คำนวณยอดรวม, ภาษี, ส่วนลด
- * - ประมวลผลการชำระเงิน
- * - บันทึกรายการขายลงในไฟล์ CSV
- */
-public class Jflame_dashboard_order extends JFrame {
 
-    private DefaultTableModel cartTableModel; // Model สำหรับตะกร้า
+public class Jflame_dashboard_order extends JFrame {
+    private mainframe mainframe;
+    private DefaultTableModel cartTableModel;
     private DefaultTableModel productTableModel; // Model สำหรับตารางสินค้า
     private List<DataModels.Product> productList; // รายการสินค้าทั้งหมดที่โหลดจาก CSV
-    private JLabel subtotalLabel; // Label สำหรับแสดงยอดรวมย่อย
-    private JLabel taxLabel; // Label สำหรับแสดงภาษี
-    private JLabel totalLabel; // Label สำหรับแสดงยอดรวมทั้งหมด
-    private JTextField searchField; // ช่องค้นหาสินค้า
+    private JLabel subtotalLabel;
+    private JLabel taxLabel;
+    private JLabel totalLabel;
+    private JTextField searchField;
     private double currentDiscount = 0.0; // ตัวแปรเก็บส่วนลดปัจจุบัน
     private JLabel discountLabel; // Label สำหรับแสดงส่วนลด
     private JTable cartTable; // ตัวแปร JTable สำหรับตะกร้า
-    private PricingService pricingService ; // บริการคำนวณราคาและส่วนลด
-
-    // Constructor
-    public Jflame_dashboard_order(){
-
-        // การตั้งค่าพื้นฐานของ JFrame
+    private PricingService pricingService = new PricingService();
+    public Jflame_dashboard_order(mainframe mainframe){
+        this.mainframe=mainframe;
         setTitle("Point of Sale");
         setSize(1000, 750);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // จัดให้อยู่กึ่งกลางหน้าจอ
-        setIconImage(new ImageIcon("./picture/MRDRY_logo.png").getImage());
+        setIconImage(new ImageIcon("MRDRY_logo.png").getImage());
         
 
         // ใช้ Look and Feel ของระบบปฏิบัติการเพื่อให้ดูเป็นธรรมชาติ
@@ -64,27 +50,29 @@ public class Jflame_dashboard_order extends JFrame {
         }
 
         // กำหนดโทนสีที่ทันสมัยและดูสบายตา
-        Color backgroundColor = Color.WHITE; // สีขาวสำหรับพื้นหลัง
-        Color panelColor = new Color(216,191,216); // สีเหลืองครีมพาสเทลสำหรับแผงหลัก
+        Color backgroundColor = new Color(240, 242, 245); // สีเทาอ่อนสำหรับพื้นหลัง
+        Color panelColor = Color.WHITE; // สีขาวสำหรับแผงหลัก
         Color accentColor = new Color(0, 123, 255); // สีน้ำเงินสำหรับปุ่มและเน้นข้อความ
 
         getContentPane().setBackground(backgroundColor);
         setLayout(new BorderLayout(15, 15)); // เพิ่มระยะห่างระหว่างส่วนประกอบหลัก
         
-        // เมนูบาร์ด้านบน
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
-        JMenuItem dashboardItem = new JMenuItem("Dashboard");
-        JMenuItem inventoryItem = new JMenuItem("Inventory");
-        dashboardItem.addActionListener(e -> {
-            new dashboard();
+        JMenuItem exitItem = new JMenuItem("Go to Dashboard");
+        JMenuItem inventoryItem = new JMenuItem("Go to Inventory");
+        exitItem.addActionListener(e -> {
+             if (mainframe != null) mainframe.setVisible(true);
             dispose();
         });
         inventoryItem.addActionListener(e -> {
-            new inventory();
+            if (mainframe != null) {
+        mainframe.showcard("inventory");
+        mainframe.setVisible(true);
+    }
             dispose();
         });
-        fileMenu.add(dashboardItem);
+        fileMenu.add(exitItem);
         fileMenu.add(inventoryItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
@@ -103,10 +91,10 @@ public class Jflame_dashboard_order extends JFrame {
     // สร้างหน้าต่าง Panel หลักทั้งหมด
     private JPanel createMainPanel(Color panelColor, Color accentColor) {
         JPanel mainPanel = new JPanel(new GridLayout(1, 3, 15, 0)); // เพิ่มระยะห่างระหว่างคอลัมน์
-        mainPanel.setBackground(Color.WHITE);
-        JPanel productPanel = createProductPanel(panelColor, accentColor); // แผงสินค้า
-        JPanel shoppingCartPanel = createShoppingCartPanel(panelColor); // ตะกร้าสินค้า
-        JPanel totalPanel = createTotalPanel(panelColor, accentColor); // ยอดรวมและการชำระเงิน
+        
+        JPanel productPanel = createProductPanel(panelColor, accentColor);
+        JPanel shoppingCartPanel = createShoppingCartPanel(panelColor);
+        JPanel totalPanel = createTotalPanel(panelColor, accentColor);
         
         mainPanel.add(productPanel);
         mainPanel.add(shoppingCartPanel);
@@ -115,7 +103,7 @@ public class Jflame_dashboard_order extends JFrame {
         return mainPanel;
     }
 
-    // แสดงรายการสินค้าและค้นหาสินค้า
+
     private JPanel createProductPanel(Color panelColor, Color accentColor) {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(panelColor);
@@ -124,7 +112,7 @@ public class Jflame_dashboard_order extends JFrame {
             BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Product Information", 
                 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                 javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                new Font("Garamond", Font.BOLD, 14), 
+                new Font("Tahoma", Font.BOLD, 14), 
                 Color.DARK_GRAY)));
         
         
@@ -133,9 +121,8 @@ public class Jflame_dashboard_order extends JFrame {
         searchPanel.setBackground(panelColor);
         searchPanel.setBorder(new EmptyBorder(10, 10, 5, 10));
 
-        searchField = new JTextField();
-        searchField.setBackground(new Color(250,248,228));
-        searchField.setFont(new Font("Garamond", Font.PLAIN, 14));
+        searchField = new JTextField(); 
+        searchField.setFont(new Font("Tahoma", Font.PLAIN, 14));
         searchPanel.add(new JLabel("Search Product or Scan Barcode"), BorderLayout.NORTH);
         searchPanel.add(searchField, BorderLayout.CENTER);
 
@@ -147,12 +134,10 @@ public class Jflame_dashboard_order extends JFrame {
                  return false; // ห้ามแก้ไขข้อมูลในตารางสินค้า
             }
         };
-
         JTable productTable = new JTable(productTableModel);
         productTable.setFillsViewportHeight(true);
-        productTable.setBackground(new Color(250,248,228 ));
-        productTable.setFont(new Font("Garamond", Font.PLAIN, 12));
-        productTable.getTableHeader().setFont(new Font("Garamond", Font.BOLD, 12));
+        productTable.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        productTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
         
         JScrollPane productScrollPane = new JScrollPane(productTable);
         productScrollPane.setBorder(new EmptyBorder(0, 10, 0, 10)); // เพิ่มช่องว่างด้านข้าง
@@ -178,22 +163,6 @@ public class Jflame_dashboard_order extends JFrame {
         actionPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     
         JButton manualEnterButton = createStyledButton("Add Product by ID", accentColor, Color.WHITE);
-        manualEnterButton.setBackground(new Color(185,150,205)); 
-        manualEnterButton.setForeground(Color.WHITE); 
-        manualEnterButton.setBorderPainted(false);
-
-        // เพิ่ม action เวลากดปุ่ม (add)
-        manualEnterButton.getModel().addChangeListener(e -> {
-        ButtonModel m = manualEnterButton.getModel();
-            if (m.isPressed()) {
-            manualEnterButton.setBackground(new Color(140,100,165));
-            } else if (m.isRollover()) {
-            manualEnterButton.setBackground(new Color(160,120,180));
-            } else {
-            manualEnterButton.setBackground(new Color(185,150,205));
-            }
-        });
-
         manualEnterButton.addActionListener(e -> {
             String productID = searchField.getText().trim(); 
             if (!productID.isEmpty()) {
@@ -205,22 +174,6 @@ public class Jflame_dashboard_order extends JFrame {
         });
         actionPanel.add(manualEnterButton);
         JButton deleteButton = createStyledButton("Delete Item from Cart", new Color(220, 53, 69), Color.WHITE);
-        deleteButton.setBackground(new Color(185,150,205)); 
-        deleteButton.setForeground(Color.WHITE); 
-        deleteButton.setBorderPainted(false);
-
-        // เพิ่ม action เวลากดปุ่ม (delete)
-        deleteButton.getModel().addChangeListener(e -> {
-        ButtonModel d = deleteButton.getModel();
-            if (d.isPressed()) {
-            deleteButton.setBackground(new Color(140,100,165));
-            } else if (d.isRollover()) {
-            deleteButton.setBackground(new Color(160,120,180));
-            } else {
-            deleteButton.setBackground(new Color(185,150,205));
-            }
-        });
-
         deleteButton.addActionListener(e -> {
             // โค้ดสำหรับลบสินค้าในตะกร้า (Cart)
             int selectedRow = cartTable.getSelectedRow();
@@ -237,7 +190,7 @@ public class Jflame_dashboard_order extends JFrame {
         actionPanel.add(deleteButton);
         
         // จัดเรียงส่วนประกอบ
-        panel.add(searchPanel, BorderLayout.NORTH); // ช่องค้นหาอยู่ด้านบน
+        panel.add(searchPanel, BorderLayout.NORTH);
         panel.add(productScrollPane, BorderLayout.CENTER); // ตารางอยู่ตรงกลาง
         panel.add(actionPanel, BorderLayout.SOUTH); // ปุ่มอยู่ด้านล่าง
         
@@ -257,7 +210,7 @@ public class Jflame_dashboard_order extends JFrame {
             BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Shopping carts", 
                 javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                 javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                new Font("Garamond", Font.BOLD, 14), 
+                new Font("Tahoma", Font.BOLD, 14), 
                 Color.DARK_GRAY)));
 
         String[] columnNames = {"List", "Quantity", "Total"};
@@ -273,9 +226,8 @@ public class Jflame_dashboard_order extends JFrame {
         
         // ปรับปรุงรูปลักษณ์ของตาราง
         cartTable.setFillsViewportHeight(true);
-        cartTable.setBackground(new Color(250,248,228 ));
-        cartTable.setFont(new Font("Garamond", Font.PLAIN, 12));
-        cartTable.getTableHeader().setFont(new Font("Garamond", Font.BOLD, 12));
+        cartTable.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        cartTable.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 12));
         cartTable.getTableHeader().setBackground(new Color(245, 245, 245));
         
         JScrollPane scrollPane = new JScrollPane(cartTable);
@@ -302,13 +254,13 @@ public class Jflame_dashboard_order extends JFrame {
     gbc.insets = new Insets(5, 5, 5, 5); // ช่องว่างระหว่างแถว
     
     // ตั้งค่าตัวจัดเรียงข้อความ
-    Font labelFont = new Font("Garamond", Font.BOLD, 14);
-    Font valueFont = new Font("Garamond", Font.BOLD, 16);
+    Font labelFont = new Font("Tahoma", Font.BOLD, 14);
+    Font valueFont = new Font("Tahoma", Font.BOLD, 16);
     
     // Helper function สำหรับเพิ่มแถวใน GridBagLayout
-    autoAddRow(totalsPanel, gbc, "Subtotal:", labelFont, valueFont, Color.DARK_GRAY, subtotalLabel = new JLabel("0.00"));
-    autoAddRow(totalsPanel, gbc, "Discount:", labelFont, valueFont, new Color(255,105,180), discountLabel = new JLabel("0.00")); // แถวใหม่สำหรับส่วนลด
-    autoAddRow(totalsPanel, gbc, "Tax (7%):", labelFont, valueFont, Color.DARK_GRAY, taxLabel = new JLabel("0.00"));
+    autoAddRow(totalsPanel, gbc, "Subtotal:", labelFont, valueFont, Color.DARK_GRAY, subtotalLabel = new JLabel("฿0.00"));
+    autoAddRow(totalsPanel, gbc, "Discount:", labelFont, valueFont, new Color(220, 53, 69), discountLabel = new JLabel("฿0.00")); // แถวใหม่สำหรับส่วนลด
+    autoAddRow(totalsPanel, gbc, "Tax (7%):", labelFont, valueFont, Color.DARK_GRAY, taxLabel = new JLabel("฿0.00"));
 
     // เส้นคั่นก่อน Total
     JSeparator separator = new JSeparator(JSeparator.HORIZONTAL);
@@ -321,14 +273,15 @@ public class Jflame_dashboard_order extends JFrame {
     gbc.gridx = 0;
     gbc.gridy++;
     JLabel totalTitle = new JLabel("TOTAL:");
-    totalTitle.setFont(new Font("Garamond", Font.BOLD, 18));
-    totalTitle.setForeground(new Color(255, 218, 185));
+    totalTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
+    totalTitle.setForeground(accentColor);
     gbc.gridwidth = 1; // ต้องตั้งกลับไปเป็น 1 เพื่อให้ช่องขวาจัดชิดขวา
-    totalsPanel.add(totalTitle, gbc);
+    totalsPanel.add(totalTitle, gbc); 
+
     gbc.gridx = 1;
-    totalLabel = new JLabel("0.00");
-    totalLabel.setFont(new Font("Garamond", Font.BOLD, 22));
-    totalLabel.setForeground(new Color(255, 218, 185));
+    totalLabel = new JLabel("฿0.00");
+    totalLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
+    totalLabel.setForeground(accentColor);
     totalLabel.setHorizontalAlignment(SwingConstants.RIGHT); // จัดชิดขวา
     totalsPanel.add(totalLabel, gbc);
     
@@ -344,46 +297,10 @@ public class Jflame_dashboard_order extends JFrame {
     
     // ปุ่มต่างๆ
     JButton cashButton = createStyledButton("Cash", accentColor, Color.WHITE);
-    cashButton.setBackground(new Color(185,150,205)); 
-    cashButton.setForeground(Color.WHITE); 
-    cashButton.setFont(new Font("Garamond",Font.BOLD, 16));
-    cashButton.setBorderPainted(false);
     cashButton.addActionListener(e -> processPayment("Cash"));
     buttonPanel.add(cashButton);
 
-    // ปรับให้ปุ่มดูดีเวลากด (cash)
-        cashButton.getModel().addChangeListener(e -> {
-        ButtonModel ca = cashButton.getModel();
-            if (ca.isPressed()) {
-            cashButton.setBackground(new Color(140,100,165));
-            } else if (ca.isRollover()) {
-            // ตอนชี้ (hover)
-            cashButton.setBackground(new Color(160,120,180));
-            } else {
-            cashButton.setBackground(new Color(185,150,205));
-            }
-        });
-
     JButton codeButton = createStyledButton("Use Code", accentColor, Color.WHITE);
-    codeButton.setBackground(new Color(185,150,205)); 
-    codeButton.setForeground(Color.WHITE); 
-    codeButton.setFont(new Font("Garamond",Font.BOLD, 16));
-    codeButton.setBorderPainted(false);
-    
-    // ปรับให้ปุ่มดูดีเวลากด (use code)
-        codeButton.getModel().addChangeListener(e -> { {
-        ButtonModel co = codeButton.getModel();
-            if (co.isPressed()) {
-            codeButton.setBackground(new Color(140,100,165));
-            } else if (co.isRollover()) {
-            // ตอนชี้ (hover)
-            codeButton.setBackground(new Color(160,120,180));
-            } else {
-            codeButton.setBackground(new Color(185,150,205));
-            }
-        }
-        });
-
     codeButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -420,7 +337,7 @@ public class Jflame_dashboard_order extends JFrame {
     // ฟังก์ชันช่วยในการสร้างปุ่มที่มีสไตล์
     private JButton createStyledButton(String text, Color bgColor, Color fgColor) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Garamond", Font.BOLD, 14));
+        button.setFont(new Font("Tahoma", Font.BOLD, 14));
         button.setBackground(bgColor);
         button.setForeground(fgColor);
         button.setFocusPainted(false);
@@ -431,7 +348,7 @@ public class Jflame_dashboard_order extends JFrame {
     // เมทอดสำหรับเพิ่มสินค้าลงในตะกร้า
     private void addProductToCart(String productID) {
     
-    Product selectedProduct = null;
+    DataModels.Product selectedProduct = null;
     if (productList != null) {
         for (DataModels.Product product : productList) {
             // ต้องเปรียบเทียบ SKU ด้วย equals
@@ -442,16 +359,16 @@ public class Jflame_dashboard_order extends JFrame {
         }
     }
     
-    // ตรวจสอบว่าพบสินค้าหรือไม่
     if (selectedProduct == null) {
         JOptionPane.showMessageDialog(this, "Product ID not found: " + productID, "Not Found", JOptionPane.WARNING_MESSAGE);
         return;
     }
 
-    // ตรวจสอบสต็อก
+        // ตรวจสอบสต็อก
+    
     if (selectedProduct.stock() <= 0) {
         JOptionPane.showMessageDialog(this, 
-            "Product '" + selectedProduct.name() + "' is out of stock.", 
+            "สินค้าหมด! (Stock: 0) ไม่สามารถเพิ่มสินค้าลงในตะกร้าได้.", 
             "Out of Stock", 
             JOptionPane.WARNING_MESSAGE);
         return; // หยุดการทำงานถ้าสินค้าหมด
@@ -459,7 +376,6 @@ public class Jflame_dashboard_order extends JFrame {
     
     String productName = selectedProduct.name();
     double price = selectedProduct.price();
-
     // ดึงสต็อกปัจจุบันของสินค้าเพื่อใช้ตรวจสอบก่อนเพิ่ม (เผื่อมีการเรียกซ้ำ)
     int availableStock = selectedProduct.stock();
     
@@ -471,6 +387,8 @@ public class Jflame_dashboard_order extends JFrame {
     for (int i = 0; i < cartTableModel.getRowCount(); i++) {
         // ตรวจสอบจากชื่อสินค้าในตะกร้า
         if (cartTableModel.getValueAt(i, 0).equals(productName)) {
+            
+            // ... (โค้ดดึง currentQuantity เหมือนเดิม) ...
             int currentQuantity = 0;
             try {
                 currentQuantity = (int) cartTableModel.getValueAt(i, 1);
@@ -482,25 +400,30 @@ public class Jflame_dashboard_order extends JFrame {
                     } catch (NumberFormatException ignored) {}
                 }
             }
-            //  เพิ่มโค้ดตรวจสอบสต็อกเมื่อมีการเพิ่มซ้ำ
+            
+            // =======================================================
+            // *** 2. เพิ่มโค้ดตรวจสอบสต็อกเมื่อมีการเพิ่มซ้ำ ***
+            // =======================================================
             if (currentQuantity >= availableStock) {
-                 JOptionPane.showMessageDialog(this,
-                    "Cannot add more of '" + productName + "'. Available stock: " + availableStock, 
-                    "Stock Limit Reached",
+                 JOptionPane.showMessageDialog(this, 
+                    "เพิ่มสินค้าไม่ได้! จำนวนในตะกร้า (" + currentQuantity + ") เกินสต็อกที่มี (" + availableStock + ").", 
+                    "Stock Limit Reached", 
                     JOptionPane.WARNING_MESSAGE);
                 return;
             }
+            // =======================================================
             
             double currentTotal = (double) cartTableModel.getValueAt(i, 2); 
             
-            cartTableModel.setValueAt(currentQuantity + 1, i, 1); // อัปเดตจำนวน
-            cartTableModel.setValueAt(currentTotal + price, i, 2); // อัปเดตยอดรวม
+            cartTableModel.setValueAt(currentQuantity + 1, i, 1);
+            cartTableModel.setValueAt(currentTotal + price, i, 2);
             productFound = true;
             break;
         }
     }
 
     if (!productFound) {
+        // ... (โค้ดเพิ่มแถวใหม่เหมือนเดิม) ...
         cartTableModel.addRow(new Object[]{productName, quantity, total});
     }
     
@@ -552,21 +475,21 @@ private void updateTotals() {
     double total = effectiveSubtotal + tax;
     
     // อัปเดต Label
-    subtotalLabel.setText(String.format("%.2f", subtotal));
-    discountLabel.setText(String.format("-%.2f", discountApplied)); // แสดงส่วนลดที่ใช้จริง
-    taxLabel.setText(String.format("%.2f", tax));
-    totalLabel.setText(String.format("%.2f", total));
+    subtotalLabel.setText(String.format("฿%.2f", subtotal));
+    discountLabel.setText(String.format("-฿%.2f", discountApplied)); // แสดงส่วนลดที่ใช้จริง
+    taxLabel.setText(String.format("฿%.2f", tax));
+    totalLabel.setText(String.format("฿%.2f", total));
 }
 
     // เมทอดสำหรับประมวลผลการชำระเงิน
     private void processPayment(String paymentMethod) {
-        // ตรวจสอบว่าตะกร้าไม่ว่างเปล่า
         if (cartTableModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Shopping cart is empty. Please add products first.", "Payment Failed", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
         // ดึงยอดรวมสุดท้ายก่อนทำการชำระ
-        String totalText = totalLabel.getText().replace("", "").replace(",", "");
+        String totalText = totalLabel.getText().replace("฿", "").replace(",", "");
         double totalAmount = 0.0;
         try {
             totalAmount = Double.parseDouble(totalText);
@@ -606,10 +529,10 @@ private void updateTotals() {
                     if (p.name().equals(productName)) {
                         
                         int newStock = p.stock() - quantitySold;
-                        if (newStock < 0) newStock = 0;
+                        if (newStock < 0) newStock = 0; 
                         
                         // สร้าง Product ใหม่และอัปเดต List
-                        productList.set(j, new Product(p.sku(), p.name(), p.price(), newStock));
+                        productList.set(j, new DataModels.Product(p.sku(), p.name(), p.price(), newStock));
                         break;
                     }
                 }
@@ -633,12 +556,10 @@ private void updateTotals() {
             loadProductsFromCSV();
         }
     }
-
     // โหลดสินค้าจาก CSV และเติมลงในตาราง
-    // ใช้ class ProductCSVReader ในการอ่านไฟล์
     private void loadProductsFromCSV() {
         
-        ProductCSVReader reader = new ProductCSVReader();
+        DataModels.ProductCSVReader reader = new DataModels.ProductCSVReader();
         productList = reader.readProductsFromCSV(); // อ่านข้อมูลทั้งหมด
         
         // เติมข้อมูลลงในตารางสินค้า
@@ -651,34 +572,32 @@ private void updateTotals() {
                 productTableModel.addRow(new Object[]{
                     product.sku(), 
                     product.name(), 
-                    String.format("%.2f", product.price())
+                    String.format("฿%.2f", product.price())
                 });
             }
         }
     }
 
-    // เมทอดสำหรับใช้โค้ดส่วนลด
-    // ใช้ class PricingService ในการคำนวณส่วนลด
-    private void applyDiscountCode(String code) {
-        // คำนวณ Subtotal ปัจจุบัน
-        double subtotal = 0.0;
-            for (int i = 0; i < cartTableModel.getRowCount(); i++) {
-            // ดัชนี 2 คือ Total
-            try {
-                subtotal += (double) cartTableModel.getValueAt(i, 2); 
-            } catch (ClassCastException e) {
-                Object totalValue = cartTableModel.getValueAt(i, 2);
-                if (totalValue instanceof String) {
-                    try {
-                    subtotal += Double.parseDouble((String) totalValue);
-                } catch (NumberFormatException ignored) {}
-            }
+private void applyDiscountCode(String code) {
+    // คำนวณ Subtotal ปัจจุบัน
+    double subtotal = 0.0;
+    for (int i = 0; i < cartTableModel.getRowCount(); i++) {
+        // ดัชนี 2 คือ Total
+        try {
+            subtotal += (double) cartTableModel.getValueAt(i, 2); 
+        } catch (ClassCastException e) {
+             Object totalValue = cartTableModel.getValueAt(i, 2);
+             if (totalValue instanceof String) {
+                 try {
+                     subtotal += Double.parseDouble((String) totalValue);
+                 } catch (NumberFormatException ignored) {}
+             }
         }
     }
     
     // รีเซ็ตส่วนลดก่อน
     double oldDiscount = currentDiscount;
-    currentDiscount = 0.0; // โค้ดใหม่จะล้างโค้ดเก่าเสมอ
+    currentDiscount = 0.0; // สมมติว่าโค้ดใหม่จะล้างโค้ดเก่าเสมอ
     
     // คำนวณส่วนลดโดยใช้ PricingService
     double calculatedDiscount = pricingService.calDiscount(subtotal, code);
@@ -692,7 +611,7 @@ private void updateTotals() {
         if (code.equalsIgnoreCase("SALE20")) {
             discountMessage = " (20% off on subtotal)";
         } else if (code.equalsIgnoreCase("TENOFF")) {
-            discountMessage = " (10.00 off)";
+            discountMessage = " (฿10.00 off)";
         } else {
             discountMessage = ""; // ใช้ในกรณีที่มีโค้ดอื่นๆ เพิ่มเติม
         }
@@ -714,7 +633,6 @@ private void updateTotals() {
     }
 }
 
-// ฟังก์ชันช่วยในการเพิ่มแถวใน GridBagLayout
 private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Font titleFont, Font valueFont, Color valueColor, JLabel valueLabel) {
     gbc.gridy++;
     
@@ -761,7 +679,7 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
         try (FileWriter fw = new FileWriter(filePath, true); // true คือโหมด append (เขียนต่อท้าย)
             PrintWriter pw = new PrintWriter(fw)) {
             // สร้าง Order ID และ Date
-            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             String date = LocalDateTime.now().toLocalDate().toString();
             String line = String.format("%s,%.2f,%s", orderId, totalAmount, date);
             
@@ -775,8 +693,6 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
             e.printStackTrace();
         }
     }
-
-    // เมทอดสำหรับบันทึกสินค้าที่ขายลงในไฟล์ Product_sold.csv
     private void saveproduct_sold(String product_Name,int quantity){
         String CSV_FILE = "./FileCSV/Product_sold.csv"; 
         String CSV_HEADER = "OrderID,Date,Name,Quantity";
@@ -787,7 +703,7 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
         try{
             fw=new FileWriter(file,true);
             bw=new BufferedWriter(fw);
-            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             String date=LocalDateTime.now().toLocalDate().toString();
             String line=String.format("%s,%s,%s,%d", orderID, date, product_Name, quantity);
             if(checkHeader){

@@ -4,7 +4,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class loginpanel extends JFrame implements ActionListener{
-
+    private mainframe mainframe;
     private JTextField txtUser;
     private JPasswordField txtPassword;
     private JButton btnLogin;
@@ -19,7 +19,7 @@ public class loginpanel extends JFrame implements ActionListener{
             cp.setBackground(new Color(216,191,216));
 
         // ----------------- LOGO -----------------
-            ImageIcon centerIcon = new ImageIcon(getClass().getResource("/picture/mr_DRY_logo_ver2.png"));
+            ImageIcon centerIcon = new ImageIcon("./picture/MRDRY.png");
             Image centerImg = centerIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
             JLabel lblLogo = new JLabel(new ImageIcon(centerImg));
             lblLogo.setBounds(150, 20, 80, 80);
@@ -27,7 +27,7 @@ public class loginpanel extends JFrame implements ActionListener{
 
         // ----------------- Panel ด้านใน ----------------------
             JPanel jPanel2 = new JPanel();
-            jPanel2.setBackground(new Color(250,248,228));
+            jPanel2.setBackground(Color.WHITE);
             jPanel2.setLayout(null);
             jPanel2.setBounds(50, 120, 280, 160);  
             jPanel2.setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 1));
@@ -39,7 +39,7 @@ public class loginpanel extends JFrame implements ActionListener{
             jPanel2.add(userIcon);
 
             JLabel l1 = new JLabel("USERNAME");
-            l1.setFont(new Font("Garamond", Font.BOLD, 14));
+            l1.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
             l1.setBounds(20, 10, 120, 20);
             jPanel2.add(l1);
 
@@ -71,7 +71,7 @@ public class loginpanel extends JFrame implements ActionListener{
             jPanel2.add(passIcon);
 
             JLabel l2 = new JLabel("PASSWORD");
-            l2.setFont(new Font("Garamond", Font.BOLD, 14));
+            l2.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
             l2.setBounds(20, 70, 120, 20);
             jPanel2.add(l2);
 
@@ -98,23 +98,12 @@ public class loginpanel extends JFrame implements ActionListener{
 
         // -------------------- ปุ่ม Login ---------------------
         btnLogin = new JButton("LOGIN");
-            btnLogin.setFont(new Font("Garamond", Font.BOLD, 14));
+            btnLogin.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
             btnLogin.setBounds(140, 300, 100, 30);
-            btnLogin.setBackground(new Color(185,150,205));
+            btnLogin.setBackground(new Color(242, 145, 129));
             btnLogin.setForeground(Color.WHITE);
             btnLogin.setFocusPainted(false);
             cp.add(btnLogin);
-        // เพิ่ม action เวลากดปุ่ม (login)
-          btnLogin.getModel().addChangeListener(e -> {
-        ButtonModel bt = btnLogin.getModel();
-            if (bt.isPressed()) {
-            btnLogin.setBackground(new Color(140,100,165));
-            } else if (bt.isRollover()) {
-            btnLogin.setBackground(new Color(160,120,180));
-            } else {
-            btnLogin.setBackground(new Color(185,150,205));
-            }
-        });
         
 
         // Event check
@@ -155,7 +144,7 @@ public class loginpanel extends JFrame implements ActionListener{
         JOptionPane.showMessageDialog(this, "Login successful!",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
         SwingUtilities.invokeLater(() -> {
-            new dashboard();  // เปิดหน้าใหม่
+            new mainframe();  // เปิดหน้าใหม่
         });
         dispose();            // ปิด login หลังเปิดหน้าใหม่
     } else {

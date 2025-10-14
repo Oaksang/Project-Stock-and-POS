@@ -6,15 +6,17 @@ import java.io.IOException;
 import java.io.File;
 import java.util.List;
 
-/**
- * class ที่ใช้ในการเขียนข้อมูลสินค้าลงในไฟล์ CSV
- * หน้าที่ของคลาสนี้คือการเปิดไฟล์ CSV ที่เก็บข้อมูลสินค้า
- * เขียนข้อมูลสินค้าทั้งหมดลงในไฟล์
- */
 public class ProductCSVWriter {
 
+    // ตรวจสอบให้แน่ใจว่าใช้ชื่อไฟล์เดียวกับ ProductCSVReader
     private static final String CSV_FILE = "./FileCSV/products.csv"; 
     private static final String CSV_HEADER = "SKU,Name,Price,Stock";
+
+    /**
+     * เขียนรายการสินค้าทั้งหมดทับไฟล์ CSV เดิม
+     * เมทอดนี้ใช้เมื่อมีการเปลี่ยนแปลงข้อมูล เช่น เพิ่มสินค้าใหม่ หรืออัปเดตสต็อก
+     * @param products รายการ Product object ทั้งหมดในคลัง
+     */
     public void writeAllProductsToCSV(List<Product> products) {
         File file = new File(CSV_FILE);
 
@@ -22,11 +24,11 @@ public class ProductCSVWriter {
         try (FileWriter fw = new FileWriter(file, false); 
              BufferedWriter bw = new BufferedWriter(fw)) {
 
-            // เขียน Header
+            // 1. เขียน Header
             bw.write(CSV_HEADER);
             bw.newLine();
 
-            // เขียนข้อมูลสินค้าทุกรายการ
+            // 2. เขียนข้อมูลสินค้าทุกรายการ
             for (Product product : products) {
                 String productLine = String.join(",",
                     product.sku(),
