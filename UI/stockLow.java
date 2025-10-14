@@ -13,6 +13,12 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
+/*
+ * class แสดงสินค้าที่มีจำนวนคงเหลือต่ำกว่า 10 ชิ้นในคลัง
+ * โดยสามารถเลือกจัดเรียงสินค้าได้ตามราคาหรือจำนวนคงเหลือ
+ * มีปุ่มเมนูสำหรับไปยังหน้าต่างอื่นๆ เช่น หน้าแรก หน้าคลังสินค้า หน้าระบบขายสินค้า และปุ่มออกจากระบบ
+ */
 public class stockLow extends JFrame implements ActionListener{
     Container cp;
     JRadioButton sortstock,sortprice;
@@ -76,7 +82,7 @@ public class stockLow extends JFrame implements ActionListener{
     ButtonGroup group=new ButtonGroup();
     group.add(sortprice);
     group.add(sortstock);
-    // 1. ตั้งค่า Model และ Header
+    // ตั้งค่า Model และ Header
         String[] columnNames = {"SKU", "Name", "Price", "Stock"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             // ทำให้ตารางแก้ไขข้อมูลไม่ได้
@@ -86,7 +92,7 @@ public class stockLow extends JFrame implements ActionListener{
             }
         };
         
-        // 2. สร้าง JTable และ JScrollPane
+        // สร้าง JTable และ JScrollPane
         productTable = new JTable(tableModel);
         productTable.setFont(new Font("Garamond", Font.PLAIN, 14));
         productTable.setRowHeight(25);
@@ -97,7 +103,7 @@ public class stockLow extends JFrame implements ActionListener{
         
         tableScrollPane.setBounds(65, 70, 400, 400);
         
-        // 3. เพิ่ม JScrollPane (ซึ่งมี JTable อยู่ข้างใน) เข้าสู่ Container
+        // เพิ่ม JScrollPane (ซึ่งมี JTable อยู่ข้างใน) เข้าสู่ Container
         cp.add(tableScrollPane);
 
     // ปุ่ม home
@@ -219,6 +225,8 @@ public class stockLow extends JFrame implements ActionListener{
            this.sortProductData(false,this.showlow(initialProducts, 10));
         }
     }
+
+    // โหลดข้อมูลสินค้าไปยังตาราง
     public void loadProductData(List <Product> product_low) {
         tableModel.setRowCount(0);
 
@@ -231,6 +239,9 @@ public class stockLow extends JFrame implements ActionListener{
             tableModel.addRow(row);
         }
     }
+
+    // จัดเรียงข้อมูลสินค้าและโหลดไปยังตาราง
+    // ถ้า sort เป็น true จะจัดเรียงตามราคา, ถ้าเป็น false จะจัดเรียงตามจำนวนคงเหลือ
     public void sortProductData(boolean sort,List<Product> select) {
         tableModel.setRowCount(0);
         List<Product> products;

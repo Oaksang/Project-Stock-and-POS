@@ -7,6 +7,15 @@ import Services.InventoryService;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+/*
+ * class เพิ่มสินค้าใหม่ในคลัง
+ * โดยรับ SKU, Name, Price และจำนวนที่ต้องการเพิ่ม
+ * เมื่อเพิ่มแล้วจะบันทึกข้อมูลลงในไฟล์ CSV ทันที
+ * ถ้า SKU ซ้ำกับสินค้าที่มีอยู่แล้ว จะมีการแจ้งเตือนข้อผิดพลาด
+ * ถ้าจำนวนที่เพิ่มไม่ถูกต้อง (เช่น เป็นลบหรือไม่ใช่จำนวนเต็ม) จะมีการแจ้งเตือนข้อผิดพลาด
+ * ถ้าเพิ่มสำเร็จ จะแจ้งเตือนว่าการเพิ่มสำเร็จและบันทึกลง CSV แล้ว
+ */
 public class add2_inventory extends JFrame implements ActionListener{
     Container cp;
     JButton home,add;
@@ -92,11 +101,12 @@ public class add2_inventory extends JFrame implements ActionListener{
    @Override
    public void actionPerformed(ActionEvent e) {
       if (e.getSource() == add) {
-            String skuInput = sku.getText().trim();
-            String nameInput = name.getText().trim();
-            String priceInput = price.getText().trim();
-            String qtyInput = quantity.getText().trim();
+            String skuInput = sku.getText().trim(); // รับค่า SKU จากช่องข้อความ
+            String nameInput = name.getText().trim(); // รับค่า Name จากช่องข้อความ
+            String priceInput = price.getText().trim(); // รับค่า Price จากช่องข้อความ
+            String qtyInput = quantity.getText().trim(); // รับค่า Quantity จากช่องข้อความ
 
+            // ตรวจสอบความถูกต้องของข้อมูลที่ป้อนเข้ามา
             try {
                if (skuInput.isEmpty() || nameInput.isEmpty() || priceInput.isEmpty() || qtyInput.isEmpty()) {
                   JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
