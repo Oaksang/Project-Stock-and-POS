@@ -14,17 +14,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.time.LocalDate;
 
-/*
- * class แสดงภาพรวมของระบบ
- * โดยมีเมนูนำทางไปยังหน้าต่างต่างๆ เช่น หน้าคลังสินค้า (Inventory) และหน้าจัดการขาย (POS)
- * มีการแสดงข้อมูลสถิติต่างๆ คือ จำนวนสินค้าทั้งหมดในคลัง, จำนวนสินค้าที่มีจำนวนน้อยกว่าที่กำหนด, จำนวนสินค้าที่หมด, ยอดขายวันนี้
- * และสินค้าที่มียอดขายสูงสุด 3 อันดับ
- * สามารถคลิกที่สินค้าที่มียอดขายสูงสุดเพื่อดูกราฟวงกลมแสดงสัดส่วนยอดขายของสินค้าเหล่านั้นได้
- */
-public class dashboard extends JFrame implements ActionListener{
-  Container cp;
+public class dashboard extends JPanel implements ActionListener{
+ mainframe mainframe;
  JButton ham,home;
- JPanel p,p_top;
+ JPanel p_top;
  JButton inventory,Pos,logout;
  JButton totalstock,lowstock,outstock;
  JButton rank_1,rank_2,rank_3;
@@ -39,15 +32,14 @@ public class dashboard extends JFrame implements ActionListener{
  List<String[]> kuy,kuy2;
  List<String[]> best;
  String[] rank1,rank2,rank3;
- public dashboard(){
-    super("MR.DRY");
+ public dashboard(mainframe mainframe){
+  this.mainframe=mainframe;
     csvReader=new ProductCSVReader();
     initialProducts = csvReader.readProductsFromCSV();
     csvReaderSale=new SaleCSVRead();
     kuy=csvReaderSale.readSaleFromCSV();
     productCSVReader=new Product_soldReader();
     kuy2=productCSVReader.readSaleFromCSV();
-
     best = this.showbest(kuy2);
 
     if (best != null && best.size() >= 3) {
@@ -57,93 +49,15 @@ public class dashboard extends JFrame implements ActionListener{
     } else {
       rank1 = new String[]{"-", "0"};
       rank2 = new String[]{"-", "0"};
-      rank3 = new String[]{"-", "0"};
-}
-
-    Initial();
-    setComponent();
-    Finally();
-    setVisible(true);
- }
-
- // แสดงจำนวนสินค้าที่ใกล้หมดในStock
- public int showlow(List<Product> lowStock,int low){
-  List <Product> lowproduct=new ArrayList<>();
-  for(Product p: lowStock){
-  if((p.stock()<low)&&(p.stock()>0))
-  lowproduct.add(p);
-  }
-  int lenght=lowproduct.size();
-  return lenght;
- }
- public int showout(List <Product> outStock){
- List <Product> outproduct=new ArrayList<>();
- for(Product p: outStock){
-  if(p.stock()==0)
-  outproduct.add(p);
- }
- int lenght=outproduct.size();
- return lenght;
- }
-
- // แสดงจำนวนสินค้าทั้งหมดในStock
- public int showstock(List<Product> Stock){
-     int lenght=Stock.size();
-     return lenght;
- }
-
- // แสดงยอดขายวันนี้
-public double showsale(List<String[]> recordsale){
-  LocalDate Today=LocalDate.now();
-  double price_total=0;
-  for(String[] s: recordsale){
-    //String orderid = s[0].trim();
-    double price = Double.parseDouble(s[1].trim());
-    LocalDate date = LocalDate.parse(s[2].trim());
-    if(Today.equals(date)){
-    price_total+=price;
+      rank3 = new String[]{"-", "0"};     
     }
-}
- return price_total;
-}
-
-// แสดงสินค้าที่มีจำนวนชิ้นการขายมากที่สุด 3 อันดับ
-public List<String[]> showbest(List<String[]> product_sold){
-  LocalDate today = LocalDate.now();
-
-    // 1) รวมยอดขายต่อสินค้า (ไม่แคร์ตัวพิมพ์)
-    Map<String, Integer> sum = new HashMap<>();
-    for (String[] row : product_sold) {
-        LocalDate d = LocalDate.parse(row[1].trim());
-        if (!d.equals(today)) continue;
-
-        String key = row[2].trim().toLowerCase();   // ใช้ name หรือ sku ก็ได้
-        int qty = Integer.parseInt(row[3].trim());
-        sum.merge(key, qty, Integer::sum);
-    }
-
-    // 2) แปลงเป็นลิสต์ [nameOrSku, totalQty]
-    List<String[]> ranked = new ArrayList<>();
-    for (var e : sum.entrySet()) {
-        ranked.add(new String[]{ e.getKey(), String.valueOf(e.getValue()) });
-    }
-
-    // 3) sort: qty มาก→น้อย, ถ้าเท่ากันเรียงตามชื่อ
-    ranked.sort((a, b) -> {
-        int qa = Integer.parseInt(a[1]);
-        int qb = Integer.parseInt(b[1]);
-        int cmp = Integer.compare(qb, qa);
-        return (cmp != 0) ? cmp : a[0].compareTo(b[0]);
-    });
-    return ranked;
-}
-//record sale(String name,int quantity){}
- public void Initial(){
-    cp=getContentPane();
-    cp.setLayout(null);
-    cp.setBackground(new Color(216,191,216));
+     setLayout(null);
+     setBackground(new Color(216,191,216));
+     setSize(550, 650);
+     setComponent();   
  }
- public void setComponent(){
+
+private void setComponent(){
    home=new JButton();
    home.setIcon(home_pic);
    home.setBackground(new Color(216,191,216));
@@ -156,12 +70,12 @@ public List<String[]> showbest(List<String[]> product_sold){
    ham.setSize(20, 20);
    ham.setBorderPainted(false);
    ham.setBounds(21,0,20,20);
-   JLabel Dashboard=new JLabel("DashBoard");
-   Dashboard.setHorizontalAlignment(JLabel.LEFT);
-   Dashboard.setFont(new Font("Garamond",Font.BOLD, 50));
-   Dashboard.setBackground(new Color(216,191,216));
-   Dashboard.setForeground(new Color(250, 248, 228));
-   Dashboard.setBounds(50,60,300, 50);
+   JLabel dascardboard=new JLabel("DashBoard");
+   dascardboard.setHorizontalAlignment(JLabel.LEFT);
+   dascardboard.setFont(new Font("Garamond",Font.BOLD, 50));
+   dascardboard.setBackground(new Color(216,191,216));
+   dascardboard.setForeground(new Color(250, 248, 228));
+   dascardboard.setBounds(50,60,300, 50);
 
    JLabel total=new JLabel("Total Stock");
    total.setHorizontalAlignment(JLabel.LEFT);
@@ -242,7 +156,7 @@ public List<String[]> showbest(List<String[]> product_sold){
    sale.setBackground(new Color(216,191,216));
    sale.setForeground(new Color(250, 248, 228));
    sale.setBounds(65,450,180, 50);
-   JLabel showsale=new JLabel(String.format("%.2f Bath",showsale(kuy)));
+   JLabel showsale=new JLabel(String.format("%.2f Baht",showsale(kuy)));
    showsale.setHorizontalAlignment(JLabel.LEFT);
    showsale.setFont(new Font("Garamond",Font.BOLD, 50));
    showsale.setBackground(new Color(216,191,216));
@@ -252,10 +166,6 @@ public List<String[]> showbest(List<String[]> product_sold){
    p_top.setLayout(null);
    p_top.setBackground(new Color(250,248,228));
    p_top.setBounds(0,0,200,650);
-   p=new JPanel();
-   p.setLayout(null);
-   p.setBackground(new Color(0,0,0,0));
-   p.setBounds(0, 0, 200,650);
    inventory=new JButton("Inventory");
    inventory.setBackground(new Color(250,248,228));
    inventory.setBorderPainted(false);
@@ -285,21 +195,21 @@ public List<String[]> showbest(List<String[]> product_sold){
    p_top.add(logout);
    p_top.add(inventory);
    p_top.add(Pos);
-   cp.add(home);
-   cp.add(ham);
-   cp.add(Dashboard);
-   cp.add(total);
-   cp.add(totalstock);
-   cp.add(low);
-   cp.add(lowstock);
-   cp.add(best_label);
-   cp.add(out);
-   cp.add(outstock);
-   cp.add(rank_1);
-   cp.add(rank_2);
-   cp.add(rank_3);
-   cp.add(sale);
-   cp.add(showsale);
+   add(home);
+   add(ham);
+   add(dascardboard);
+   add(total);
+   add(totalstock);
+   add(low);
+   add(lowstock);
+   add(best_label);
+   add(out);
+   add(outstock);
+   add(rank_1);
+   add(rank_2);
+   add(rank_3);
+   add(sale);
+   add(showsale);
    ham.addActionListener(this);
    home.addActionListener(this);
    inventory.addActionListener(this);
@@ -308,27 +218,12 @@ public List<String[]> showbest(List<String[]> product_sold){
    totalstock.addActionListener(this);
    lowstock.addActionListener(this);
    outstock.addActionListener(this);
-  rank_1.addActionListener(this);
-  rank_2.addActionListener(this);
-  rank_3.addActionListener(this);
-
-
-   p.add(p_top);
-   this.setGlassPane(p);
-   p.setVisible(false);
-   p.setOpaque(false);
- }
- public void Finally(){
-    this.setSize(550,650);
-    this.setVisible(true);
-    this.setLocationRelativeTo(null);
-    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- }
-
- // Action การคลิกปุ่มต่างๆ
+   rank_1.addActionListener(this);
+   rank_2.addActionListener(this);
+   rank_3.addActionListener(this);
+}
  @Override
  public void actionPerformed(ActionEvent e) {
-      // กดปุ่มอันดับ 1,2,3 เพื่อดูกราฟวงกลมแสดงสัดส่วนยอดขาย
       List<LabelValue> chartData = new ArrayList<>();
       Object src = e.getSource();
       for (String[] r : best) {
@@ -340,59 +235,122 @@ public List<String[]> showbest(List<String[]> product_sold){
     }
     if(e.getSource()==ham){
     if (!check_p) {
-                cp.remove(home);
-                cp.remove(ham);
+                remove(home);
+                remove(ham);
                 home.setBounds(160, 0, 20, 20);
                 ham.setBounds(180, 0, 20, 20);
                 home.setBackground(new Color(250, 248, 228));
                 ham.setBackground(new Color(250, 248, 228));
                 p_top.add(home);
                 p_top.add(ham);
-                p.setVisible(true);
+                mainframe.showside(p_top);
                 check_p = true;
             } else {
                 home.setBounds(0, 0, 20, 20);
                 ham.setBounds(21, 0, 20, 20);
                 home.setBackground(new Color(216, 191, 216));
                 ham.setBackground(new Color(216, 191, 216));
-                cp.add(home);
-                cp.add(ham);
-                p.setVisible(false);
+                add(home);
+                add(ham);
+                mainframe.hideside();
                 check_p = false;
             }
-            cp.revalidate();
-            cp.repaint();
     } else if(e.getSource()==logout){
         new loginpanel();
-        dispose();
+        mainframe.dispose();
     } else if(e.getSource()==inventory){
-        new inventory();
-        dispose();
+        mainframe.showcard("inventory");
+        if (check_p) {
+                home.setBounds(0, 0, 20, 20);
+                ham.setBounds(21, 0, 20, 20);
+                home.setBackground(new Color(216, 191, 216));
+                ham.setBackground(new Color(216, 191, 216));
+                add(home);
+                add(ham);
+                mainframe.hideside();
+                check_p = false;
+            }
     }else if(e.getSource()==Pos){
-      new Jflame_dashboard_order();
-      dispose();
+      mainframe.setVisible(false);
+      new Jflame_dashboard_order(mainframe);
     } else if(e.getSource()==home){
       if (check_p) {
                 home.setBounds(0, 0, 20, 20);
                 ham.setBounds(21, 0, 20, 20);
                 home.setBackground(new Color(216, 191, 216));
                 ham.setBackground(new Color(216, 191, 216));
-                cp.add(home);
-                cp.add(ham);
-                p.setVisible(false);
+                add(home);
+                add(ham);
+                mainframe.hideside();
                 check_p = false;
             }
-            cp.revalidate();
-            cp.repaint();
     } else if(e.getSource()==totalstock){
-      new stockAll();
-      dispose();
+        mainframe.showcard("all");
     }else if(e.getSource()==lowstock){
-      new stockLow();
-      dispose(); 
+       mainframe.showcard("low");
     }else if(e.getSource()==outstock){
-      new stockout();
-      dispose();
+      mainframe.showcard("out");
     }
  }
+private int showlow(List<Product> lowStock,int low){
+  List <Product> lowproduct=new ArrayList<>();
+  for(Product p: lowStock){
+  if((p.stock()<low)&&(p.stock()>0))
+  lowproduct.add(p);
+  }
+  int lenght=lowproduct.size();
+  return lenght;
+ }
+private int showout(List <Product> outStock){
+ List <Product> outproduct=new ArrayList<>();
+ for(Product p: outStock){
+  if(p.stock()==0)
+  outproduct.add(p);
+ }
+ int lenght=outproduct.size();
+ return lenght;
+ }
+ public int showstock(List<Product> Stock){
+     int lenght=Stock.size();
+     return lenght;
+ }
+private double showsale(List<String[]> recordsale){
+  LocalDate Today=LocalDate.now();
+  double price_total=0;
+  for(String[] s: recordsale){
+    //String orderid = s[0].trim();
+    double price = Double.parseDouble(s[1].trim());
+    LocalDate date = LocalDate.parse(s[2].trim());
+    if(Today.equals(date)){
+    price_total+=price;
+    }
+}
+ return price_total;
+}
+public List<String[]> showbest(List<String[]> product_sold){
+  LocalDate today = LocalDate.now();
+
+    Map<String, Integer> sum = new HashMap<>();
+    for (String[] row : product_sold) {
+        LocalDate d = LocalDate.parse(row[1].trim());
+        if (!d.equals(today)) continue;
+
+        String key = row[2].trim().toLowerCase(); 
+        int qty = Integer.parseInt(row[3].trim());
+        sum.merge(key, qty, Integer::sum);
+    }
+
+    List<String[]> ranked = new ArrayList<>();
+    for (var e : sum.entrySet()) {
+        ranked.add(new String[]{ e.getKey(), String.valueOf(e.getValue()) });
+    }
+
+    ranked.sort((a, b) -> {
+        int qa = Integer.parseInt(a[1]);
+        int qb = Integer.parseInt(b[1]);
+        int cmp = Integer.compare(qb, qa);
+        return (cmp != 0) ? cmp : a[0].compareTo(b[0]);
+    });
+    return ranked;
+}
 }

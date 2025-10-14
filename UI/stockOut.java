@@ -13,7 +13,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-public class stockLow extends JPanel implements ActionListener{
+public class stockOut extends JPanel implements ActionListener{
     private mainframe mainframe;
     JRadioButton sortstock,sortprice;
     JTable productTable;
@@ -24,37 +24,34 @@ public class stockLow extends JPanel implements ActionListener{
     JButton inventory,Pos,logout;
     JTextField sku,quantity,name,price;
     boolean check_p=false;
-    private final InventoryService inventoryService;
+    private final InventoryService inventoryService; 
     List<Product> initialProducts;
     ImageIcon home_pic=new ImageIcon("./picture/home.png");
     ImageIcon ham_pic=new ImageIcon("./picture/hamburger.png");
     ImageIcon out_pic=new ImageIcon("./picture/logout.png");
 
-    public stockLow(mainframe mainframe){
-        this.mainframe=mainframe;
-       // โหลดสินค้าทั้งหมดจาก CSV
+    public stockOut(mainframe mainframe){
+       this.mainframe=mainframe;
        ProductCSVReader csvReader = new ProductCSVReader();
-        initialProducts= csvReader.readProductsFromCSV();
+       initialProducts = csvReader.readProductsFromCSV();
 
        this.inventoryService = new MemmoryInventoryService(initialProducts);
        Initial();
        setComponent();
-       //Finally();
-
-       loadProductData(this.showlow(initialProducts,20)); 
+       loadProductData(this.showout(initialProducts)); 
     }
-    public List <Product>showlow(List<Product> lowStock,int low){
-    List <Product> lowproduct=new ArrayList<>();
-    for(Product p: lowStock){
-    if((p.stock()<low)&&(p.stock()>0))
-    lowproduct.add(p);
+     public List<Product> showout(List <Product> outStock){
+     List <Product> outproduct=new ArrayList<>();
+     for(Product p: outStock){
+         if(p.stock()==0)
+         outproduct.add(p);
     }
-    return lowproduct;
+    return outproduct;
     }
     public void Initial(){
-    setLayout(null);
-    setBackground(new Color(216,191,216));
-    setSize(550,650);
+     setLayout(null);
+     setBackground(new Color(216,191,216));
+     setSize(550,650);
     }
 
     public void setComponent(){
@@ -164,14 +161,7 @@ public class stockLow extends JPanel implements ActionListener{
     sortprice.addActionListener(this);
     sortstock.addActionListener(this);
     p.add(p_top);
-
     }
-//     public void Finally(){
-//     this.setSize(550,650);
-//     this.setVisible(true);
-//     this.setLocationRelativeTo(null);
-//     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//  }
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==ham){
@@ -197,10 +187,9 @@ public class stockLow extends JPanel implements ActionListener{
                 check_p = false;
             }
         }else if(e.getSource()==home){
-                mainframe.showcard("dashboard");
+           mainframe.showcard("dashboard");
         }else if(e.getSource()==inventory){
-                mainframe.showcard("inventory");
-
+            mainframe.showcard("inventory");
         } else if(e.getSource()==logout){
             new loginpanel();
             mainframe.dispose();
@@ -208,15 +197,15 @@ public class stockLow extends JPanel implements ActionListener{
             new Jflame_dashboard_order(mainframe);
             mainframe.dispose();
         }else if(sortprice.isSelected()){
-           this.sortProductData(true,this.showlow(initialProducts,10));
+           this.sortProductData(true);
         }else if(sortstock.isSelected()){
-           this.sortProductData(false,this.showlow(initialProducts, 10));
+           this.sortProductData(false);
         }
     }
-    public void loadProductData(List <Product> product_low) {
+    public void loadProductData(List <Product> product_out) {
         tableModel.setRowCount(0);
 
-        for (Product product : product_low) {
+        for (Product product : product_out) {
             Vector<Object> row = new Vector<>();
             row.add(product.sku());
             row.add(product.name());
@@ -225,12 +214,12 @@ public class stockLow extends JPanel implements ActionListener{
             tableModel.addRow(row);
         }
     }
-    public void sortProductData(boolean sort,List<Product> select) {
+    public void sortProductData(boolean sort) {
         tableModel.setRowCount(0);
         List<Product> products;
         if(sort)
-        products = inventoryService.sortByPrice(false,select);
-        else products=inventoryService.sortByStock(true,select);
+        products = inventoryService.sortByPrice(false,this.showout(initialProducts));
+        else products=inventoryService.sortByStock(true,this.showout(initialProducts));
         for (Product product : products) {
             Vector<Object> row = new Vector<>();
             row.add(product.sku());

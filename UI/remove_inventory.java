@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 public class remove_inventory extends JFrame implements ActionListener{
     Container cp;
-    JButton home,remove;
+    JButton remove;
     JTextField sku,quantity;
     JLabel sku_t,quantity_t;
     private final InventoryService inventoryService;
@@ -30,12 +30,6 @@ public class remove_inventory extends JFrame implements ActionListener{
     cp.setBackground(new Color(216,191,216));
     }
     public void setComponent(){
-        home=new JButton();
-    home.setIcon(home_pic);
-    home.setBackground(new Color(216,191,216));
-    home.setSize(20, 20);
-    home.setBorderPainted(false);
-    home.setBounds(0,0,20,20);
     sku=new JTextField();
     sku.setBounds(50,50,200,25);
     sku_t=new JLabel("SKU");
@@ -43,13 +37,13 @@ public class remove_inventory extends JFrame implements ActionListener{
     sku_t.setBackground(new Color(216,191,216));
     sku_t.setForeground(new Color(250,248,228));
     sku_t.setFont(new Font("Garamond",Font.BOLD, 18));
-    /*quantity=new JTextField();
-    quantity.setBounds(50,120,200,25);
-    quantity_t=new JLabel("Quanlity");
-    quantity_t.setBounds(50, 90, 100,20);
-    quantity_t.setBackground(new Color(216,191,216));
-    quantity_t.setForeground(new Color(250,248,228));
-    quantity_t.setFont(new Font("Garamond",Font.BOLD, 18));*/
+    // quantity=new JTextField();
+    // quantity.setBounds(50,120,200,25);
+    // quantity_t=new JLabel("Quanlity");
+    // quantity_t.setBounds(50, 90, 100,20);
+    // quantity_t.setBackground(new Color(216,191,216));
+    // quantity_t.setForeground(new Color(250,248,228));
+    // quantity_t.setFont(new Font("Garamond",Font.BOLD, 18));
     remove=new JButton("Remove");
     remove.setBounds(70, 100, 150,40);
     remove.setBackground(new Color(250,250,250));
@@ -57,15 +51,10 @@ public class remove_inventory extends JFrame implements ActionListener{
     remove.setFont(new Font("Garamond",Font.BOLD, 28));
     remove.setBorderPainted(false);
 
-    //cp.add(quantity_t);
     cp.add(sku_t);
     cp.add(sku);
-    cp.add(home);
-    //cp.add(quantity);
     cp.add(remove);
-    home.addActionListener(this);
     remove.addActionListener(this);
-
     }
     public void Finally(){
     this.setSize(310,210);
@@ -111,10 +100,7 @@ public class remove_inventory extends JFrame implements ActionListener{
                     "Error", 
                     JOptionPane.ERROR_MESSAGE);
             }
-        }else if(e.getSource()==home){
-        new dashboard();
-        dispose();
-     
+
         }
     }
 }
