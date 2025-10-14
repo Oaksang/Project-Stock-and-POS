@@ -10,13 +10,19 @@ import java.util.Map;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.AllPermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+
+/*
+ * class แสดงภาพรวมของระบบ
+ * โดยมีเมนูนำทางไปยังหน้าต่างต่างๆ เช่น หน้าคลังสินค้า (Inventory) และหน้าจัดการขาย (POS)
+ * มีการแสดงข้อมูลสถิติต่างๆ คือ จำนวนสินค้าทั้งหมดในคลัง, จำนวนสินค้าที่มีจำนวนน้อยกว่าที่กำหนด, จำนวนสินค้าที่หมด, ยอดขายวันนี้
+ * และสินค้าที่มียอดขายสูงสุด 3 อันดับ
+ * สามารถคลิกที่สินค้าที่มียอดขายสูงสุดเพื่อดูกราฟวงกลมแสดงสัดส่วนยอดขายของสินค้าเหล่านั้นได้
+ */
 public class dashboard extends JFrame implements ActionListener{
- Container cp;
+  Container cp;
  JButton ham,home;
  JPanel p,p_top;
  JButton inventory,Pos,logout;
@@ -59,6 +65,8 @@ public class dashboard extends JFrame implements ActionListener{
     Finally();
     setVisible(true);
  }
+
+ // แสดงจำนวนสินค้าที่ใกล้หมดในStock
  public int showlow(List<Product> lowStock,int low){
   List <Product> lowproduct=new ArrayList<>();
   for(Product p: lowStock){
@@ -77,10 +85,14 @@ public class dashboard extends JFrame implements ActionListener{
  int lenght=outproduct.size();
  return lenght;
  }
+
+ // แสดงจำนวนสินค้าทั้งหมดในStock
  public int showstock(List<Product> Stock){
      int lenght=Stock.size();
      return lenght;
  }
+
+ // แสดงยอดขายวันนี้
 public double showsale(List<String[]> recordsale){
   LocalDate Today=LocalDate.now();
   double price_total=0;
@@ -94,6 +106,8 @@ public double showsale(List<String[]> recordsale){
 }
  return price_total;
 }
+
+// แสดงสินค้าที่มีจำนวนชิ้นการขายมากที่สุด 3 อันดับ
 public List<String[]> showbest(List<String[]> product_sold){
   LocalDate today = LocalDate.now();
 
@@ -310,8 +324,11 @@ public List<String[]> showbest(List<String[]> product_sold){
     this.setLocationRelativeTo(null);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  }
+
+ // Action การคลิกปุ่มต่างๆ
  @Override
  public void actionPerformed(ActionEvent e) {
+      // กดปุ่มอันดับ 1,2,3 เพื่อดูกราฟวงกลมแสดงสัดส่วนยอดขาย
       List<LabelValue> chartData = new ArrayList<>();
       Object src = e.getSource();
       for (String[] r : best) {

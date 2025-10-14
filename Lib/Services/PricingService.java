@@ -5,6 +5,10 @@ import DataModels.Order;
 /**
  * คลาสที่ implement DiscountStategy โดยมี logic การคำนวณมาตรฐาน
  * ใช้ประเภทข้อมูล double ซึ่งอาจมีความแม่นยำจำกัดในการคำนวณทางการเงิน
+ * หน้าที่ของคลาสนี้คือการคำนวณราคาสุทธิหลังหักส่วนลดและบวกภาษี
+ * รวมถึงการคำนวณส่วนลดและภาษีตามเงื่อนไข่นที่กำหนด
+ * @param DISCOUNT_RATE_SALE20 อัตราส่วนลด 20% , DISCOUNT_AMOUNT_TENOFF ส่วนลด 10 บาท , TAX_RATE อัตราภาษี 7%
+ * @return ราคาสุทธิหลังหักส่วนลดและบวกภาษี, ส่วนลดตามรหัสส่วนลด, ภาษีจากยอดเงิน
  */
 public class PricingService implements DiscountStategy {
 

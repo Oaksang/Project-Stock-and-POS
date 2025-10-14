@@ -13,6 +13,13 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+
+/*
+ * หน้าต่างจัดการสินค้า ที่จะโชว์ตารางสินค้าทั้งหมด
+ * สามารถเพิ่ม ลบ ค้นหา และจัดเรียงสินค้าได้
+ * เชื่อมต่อกับ MemmoryInventoryService เพื่อจัดการข้อมูลสินค้า
+ * @param inventoryService - บริการจัดการสินค้าทั้งหมด
+ */
 public class inventory extends JFrame implements ActionListener{
     Container cp;
     JTextField search;
@@ -75,7 +82,6 @@ public class inventory extends JFrame implements ActionListener{
     sortprice.setFont(new Font("Garamond",Font.BOLD, 18));
     sortprice.setBounds(15, 40, 200, 30);
     sortprice.setBackground(new Color(216,191,216));
-
     sortstock=new JRadioButton("sort by out stock",false);
     sortstock.setForeground(new Color(250,248,228));
     sortstock.setFont(new Font("Garamond",Font.BOLD, 18));
@@ -258,7 +264,7 @@ public class inventory extends JFrame implements ActionListener{
                 dispose();
         }else if(e.getSource()==add){
             String select=(String)add_product.getSelectedItem();
-            // 
+            // เพิ่มสินค้าแบบไหน
             if(select.equals("add new product")){ 
                 new add2_inventory(this.inventoryService, this); 
             }else if(select.equals("add quantity product")){ 
@@ -286,7 +292,8 @@ public class inventory extends JFrame implements ActionListener{
         } else if(e.getSource()==Pos){
             new Jflame_dashboard_order();
             dispose();
-        }else if(sortprice.isSelected()){
+        } // จัดเรียงสินค้า
+        else if(sortprice.isSelected()){
            String select=(String)search_product.getSelectedItem();
            if(check_searchTosort==null)
            this.Show_new(this.sortProductData(true,inventoryService.getAll()));
@@ -301,6 +308,7 @@ public class inventory extends JFrame implements ActionListener{
             this.Show_new(this.searchProductData(select,search.getText()));
         }
     }
+    // แสดงข้อมูลสินค้าใหม่ในตาราง
     public void Show_new(List<Product> products){
         tableModel.setRowCount(0);
         for (Product product : products) {
@@ -312,6 +320,9 @@ public class inventory extends JFrame implements ActionListener{
             tableModel.addRow(row);
         }
     }
+
+    // โหลดข้อมูลสินค้าและแสดงในตาราง
+    // เรียกใช้เมธอดนี้เมื่อมีการเพิ่ม ลบ หรือแก้ไขสินค้า
     public void loadProductData() {
         // ล้างข้อมูลเก่าทั้งหมดในตาราง
         tableModel.setRowCount(0);
@@ -329,6 +340,9 @@ public class inventory extends JFrame implements ActionListener{
             tableModel.addRow(row);
         }
     }
+    // จัดเรียงหรือค้นหาสินค้าแล้วแสดงผล
+    // ถ้า sort เป็น true จะจัดเรียงตามราคา
+    // ถ้า sort เป็น false จะจัดเรียงตามสต็อกที่น้อยที่สุด
     public List<Product> sortProductData(boolean sort,List<Product> select) {
         tableModel.setRowCount(0);
         List<Product> products;
@@ -337,6 +351,10 @@ public class inventory extends JFrame implements ActionListener{
         else products=inventoryService.sortByStock(true,select);
         return products;
     }
+    // ค้นหาสินค้า
+    // ถ้าไม่ค้นหาให้ส่ง null มา
+    // ถ้าค้นหาแล้วให้ส่งรายชื่อที่ค้นหาได้มา
+    // ถ้าไม่เจอสินค้าให้ส่งค่าว่างมา
     public List<Product> searchProductData(String s,String search) {
         List <Product> products=new ArrayList<>();
         if("search by Name".equalsIgnoreCase(s)){

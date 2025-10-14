@@ -8,7 +8,16 @@ import Services.InventoryService;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;;
+import java.awt.event.ActionListener;
+
+/*
+ * class เพิ่มสินค้าในคลังโดยเพิ่มสินค้าในคลังที่มีอยู่แล้ว
+ * โดยรับ SKU และจำนวนที่ต้องการเพิ่ม
+ * เมื่อเพิ่มแล้วจะบันทึกข้อมูลลงในไฟล์ CSV ทันที
+ * ถ้า SKU ไม่ถูกต้องหรือไม่พบในคลัง จะมีการแจ้งเตือนข้อผิดพลาด
+ * ถ้าจำนวนที่เพิ่มไม่ถูกต้อง (เช่น เป็นลบหรือไม่ใช่จำนวนเต็ม) จะมีการแจ้งเตือนข้อผิดพลาด
+ * ถ้าเพิ่มสำเร็จ จะแจ้งเตือนว่าการเพิ่มสำเร็จและบันทึกลง CSV แล้ว
+ */
 public class add_inventory extends JFrame implements ActionListener{
    Container cp;
    JButton home,add;
@@ -81,6 +90,7 @@ public class add_inventory extends JFrame implements ActionListener{
             String qtyInput = quantity.getText().trim();
 
             try {
+               // ตรวจสอบว่าค่าที่เพิ่มไม่เป็นค่าว่าง
                if (skuInput.isEmpty() || qtyInput.isEmpty()) {
                   JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
                   return;
