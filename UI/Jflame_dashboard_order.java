@@ -16,6 +16,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import DataModels.Product;
 import DataModels.ProductCSVWriter;
 import Services.PricingService;
 
@@ -24,7 +25,7 @@ public class Jflame_dashboard_order extends JFrame {
     private mainframe mainframe;
     private DefaultTableModel cartTableModel;
     private DefaultTableModel productTableModel; // Model สำหรับตารางสินค้า
-    private List<DataModels.Product> productList; // รายการสินค้าทั้งหมดที่โหลดจาก CSV
+    private List<Product> productList; // รายการสินค้าทั้งหมดที่โหลดจาก CSV
     private JLabel subtotalLabel;
     private JLabel taxLabel;
     private JLabel totalLabel;
@@ -679,7 +680,7 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
         try (FileWriter fw = new FileWriter(filePath, true); // true คือโหมด append (เขียนต่อท้าย)
             PrintWriter pw = new PrintWriter(fw)) {
             // สร้าง Order ID และ Date
-            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String orderId = "O" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddhhmmss"));
             String date = LocalDateTime.now().toLocalDate().toString();
             String line = String.format("%s,%.2f,%s", orderId, totalAmount, date);
             
@@ -703,7 +704,7 @@ private void autoAddRow(JPanel parent, GridBagConstraints gbc, String title, Fon
         try{
             fw=new FileWriter(file,true);
             bw=new BufferedWriter(fw);
-            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String orderID="O"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddhhmmss"));
             String date=LocalDateTime.now().toLocalDate().toString();
             String line=String.format("%s,%s,%s,%d", orderID, date, product_Name, quantity);
             if(checkHeader){
