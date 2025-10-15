@@ -28,6 +28,7 @@ public class add2_inventory extends JFrame implements ActionListener{
       super("MR.DRY");
       this.parentFrame = parentFrame;
       this.inventoryService = inventoryService; // รับ InventoryService เข้ามา
+        setIconImage(new ImageIcon("./picture/mr_DRY_logo_ver2.png").getImage());
       Initial();
       setComponent();
       Finally();
@@ -146,3 +147,4 @@ public class add2_inventory extends JFrame implements ActionListener{
    }
    }
 }
+
