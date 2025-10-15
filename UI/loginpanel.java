@@ -9,7 +9,7 @@ public class loginpanel extends JFrame implements ActionListener{
     private JButton btnLogin;
     Container cp;
     public loginpanel() {
-            setIconImage(new ImageIcon("./picture/MRDRY_logo.png").getImage());
+            setIconImage(new ImageIcon("./picture/mr_DRY_logo_ver2.png").getImage());
             initComponents();
     }
 
@@ -164,3 +164,4 @@ public class loginpanel extends JFrame implements ActionListener{
     
 
 }
+
