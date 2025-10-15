@@ -49,6 +49,7 @@ public class inventory extends JFrame implements ActionListener{
        check_searchTosort=null;
        // สร้าง InventoryService โดยใช้สินค้าที่โหลดมา
        this.inventoryService = new MemmoryInventoryService(initialProducts);
+        setIconImage(new ImageIcon("./picture/MRDRY_logo.png").getImage());
        Initial();
        setComponent();
        Finally();
@@ -370,4 +371,5 @@ public class inventory extends JFrame implements ActionListener{
     return check_searchTosort;
 }
 }
+
   
