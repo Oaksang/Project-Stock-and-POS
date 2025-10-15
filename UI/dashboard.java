@@ -47,6 +47,7 @@ public class dashboard extends JFrame implements ActionListener{
     kuy=csvReaderSale.readSaleFromCSV();
     productCSVReader=new Product_soldReader();
     kuy2=productCSVReader.readSaleFromCSV();
+    setIconImage(new ImageIcon("./picture/MRDRY_logo.png").getImage());
 
     best = this.showbest(kuy2);
 
@@ -395,4 +396,5 @@ public List<String[]> showbest(List<String[]> product_sold){
       dispose();
     }
  }
+
 }
