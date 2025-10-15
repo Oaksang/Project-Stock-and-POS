@@ -13,8 +13,14 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-public class stockLow extends JPanel implements ActionListener{
-    private mainframe mainframe;
+
+/*
+ * class แสดงสินค้าที่มีจำนวนคงเหลือต่ำกว่า 10 ชิ้นในคลัง
+ * โดยสามารถเลือกจัดเรียงสินค้าได้ตามราคาหรือจำนวนคงเหลือ
+ * มีปุ่มเมนูสำหรับไปยังหน้าต่างอื่นๆ เช่น หน้าแรก หน้าคลังสินค้า หน้าระบบขายสินค้า และปุ่มออกจากระบบ
+ */
+public class stockLow extends JFrame implements ActionListener{
+    Container cp;
     JRadioButton sortstock,sortprice;
     JTable productTable;
     DefaultTableModel tableModel; 
@@ -30,8 +36,8 @@ public class stockLow extends JPanel implements ActionListener{
     ImageIcon ham_pic=new ImageIcon("./picture/hamburger.png");
     ImageIcon out_pic=new ImageIcon("./picture/logout.png");
 
-    public stockLow(mainframe mainframe){
-        this.mainframe=mainframe;
+    public stockLow(){
+       super("MR.DRY");
        // โหลดสินค้าทั้งหมดจาก CSV
        ProductCSVReader csvReader = new ProductCSVReader();
         initialProducts= csvReader.readProductsFromCSV();
@@ -39,9 +45,9 @@ public class stockLow extends JPanel implements ActionListener{
        this.inventoryService = new MemmoryInventoryService(initialProducts);
        Initial();
        setComponent();
-       //Finally();
+       Finally();
 
-       loadProductData(this.showlow(initialProducts,20)); 
+       loadProductData(this.showlow(initialProducts,10)); 
     }
     public List <Product>showlow(List<Product> lowStock,int low){
     List <Product> lowproduct=new ArrayList<>();
@@ -52,9 +58,9 @@ public class stockLow extends JPanel implements ActionListener{
     return lowproduct;
     }
     public void Initial(){
-    setLayout(null);
-    setBackground(new Color(216,191,216));
-    setSize(550,650);
+    cp=getContentPane();
+    cp.setLayout(null);
+    cp.setBackground(new Color(216,191,216));
     }
 
     public void setComponent(){
@@ -76,7 +82,7 @@ public class stockLow extends JPanel implements ActionListener{
     ButtonGroup group=new ButtonGroup();
     group.add(sortprice);
     group.add(sortstock);
-    // 1. ตั้งค่า Model และ Header
+    // ตั้งค่า Model และ Header
         String[] columnNames = {"SKU", "Name", "Price", "Stock"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             // ทำให้ตารางแก้ไขข้อมูลไม่ได้
@@ -86,7 +92,7 @@ public class stockLow extends JPanel implements ActionListener{
             }
         };
         
-        // 2. สร้าง JTable และ JScrollPane
+        // สร้าง JTable และ JScrollPane
         productTable = new JTable(tableModel);
         productTable.setFont(new Font("Garamond", Font.PLAIN, 14));
         productTable.setRowHeight(25);
@@ -97,8 +103,8 @@ public class stockLow extends JPanel implements ActionListener{
         
         tableScrollPane.setBounds(65, 70, 400, 400);
         
-        // 3. เพิ่ม JScrollPane (ซึ่งมี JTable อยู่ข้างใน) เข้าสู่ Container
-        add(tableScrollPane);
+        // เพิ่ม JScrollPane (ซึ่งมี JTable อยู่ข้างใน) เข้าสู่ Container
+        cp.add(tableScrollPane);
 
     // ปุ่ม home
     home=new JButton();
@@ -152,10 +158,10 @@ public class stockLow extends JPanel implements ActionListener{
    p_top.add(logout);
    p_top.add(inventory);
    p_top.add(Pos);
-    add(home);
-    add(ham);
-    add(sortstock);
-    add(sortprice);
+    cp.add(home);
+    cp.add(ham);
+    cp.add(sortstock);
+    cp.add(sortprice);
     ham.addActionListener(this);
     home.addActionListener(this);
     inventory.addActionListener(this);
@@ -164,55 +170,63 @@ public class stockLow extends JPanel implements ActionListener{
     sortprice.addActionListener(this);
     sortstock.addActionListener(this);
     p.add(p_top);
-
+    this.setGlassPane(p);
+    p.setVisible(false);
+    p.setOpaque(false);
     }
-//     public void Finally(){
-//     this.setSize(550,650);
-//     this.setVisible(true);
-//     this.setLocationRelativeTo(null);
-//     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//  }
+    public void Finally(){
+    this.setSize(550,650);
+    this.setVisible(true);
+    this.setLocationRelativeTo(null);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ }
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==ham){
         if (!check_p) {
-                remove(home);
-                remove(ham);
+                cp.remove(home);
+                cp.remove(ham);
                 home.setBounds(160, 0, 20, 20);
                 ham.setBounds(180, 0, 20, 20);
                 home.setBackground(new Color(250, 248, 228));
                 ham.setBackground(new Color(250, 248, 228));
                 p_top.add(home);
                 p_top.add(ham);
-                mainframe.showside(p);
+                p.setVisible(true);
+                //cp.add(p_top);
                 check_p = true;
             } else {
                 home.setBounds(0, 0, 20, 20);
                 ham.setBounds(21, 0, 20, 20);
                 home.setBackground(new Color(216, 191, 216));
                 ham.setBackground(new Color(216, 191, 216));
-                add(home);
-                add(ham);
-                mainframe.hideside();
+                cp.add(home);
+                cp.add(ham);
+                p.setVisible(false);
                 check_p = false;
             }
+            cp.revalidate();
+            cp.repaint();
         }else if(e.getSource()==home){
-                mainframe.showcard("dashboard");
+                new dashboard();
+                dispose();
         }else if(e.getSource()==inventory){
-                mainframe.showcard("inventory");
-
+                new inventory();
+                dispose();
         } else if(e.getSource()==logout){
             new loginpanel();
-            mainframe.dispose();
+            dispose();
         } else if(e.getSource()==Pos){
-            new Jflame_dashboard_order(mainframe);
-            mainframe.dispose();
+            new Jflame_dashboard_order();
+            dispose();
         }else if(sortprice.isSelected()){
            this.sortProductData(true,this.showlow(initialProducts,10));
         }else if(sortstock.isSelected()){
            this.sortProductData(false,this.showlow(initialProducts, 10));
         }
     }
+
+    // โหลดข้อมูลสินค้าไปยังตาราง
     public void loadProductData(List <Product> product_low) {
         tableModel.setRowCount(0);
 
@@ -225,6 +239,9 @@ public class stockLow extends JPanel implements ActionListener{
             tableModel.addRow(row);
         }
     }
+
+    // จัดเรียงข้อมูลสินค้าและโหลดไปยังตาราง
+    // ถ้า sort เป็น true จะจัดเรียงตามราคา, ถ้าเป็น false จะจัดเรียงตามจำนวนคงเหลือ
     public void sortProductData(boolean sort,List<Product> select) {
         tableModel.setRowCount(0);
         List<Product> products;

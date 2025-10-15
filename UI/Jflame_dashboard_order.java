@@ -22,7 +22,6 @@ import Services.PricingService;
 
 
 public class Jflame_dashboard_order extends JFrame {
-    private mainframe mainframe;
     private DefaultTableModel cartTableModel;
     private DefaultTableModel productTableModel; // Model สำหรับตารางสินค้า
     private List<Product> productList; // รายการสินค้าทั้งหมดที่โหลดจาก CSV
@@ -34,8 +33,7 @@ public class Jflame_dashboard_order extends JFrame {
     private JLabel discountLabel; // Label สำหรับแสดงส่วนลด
     private JTable cartTable; // ตัวแปร JTable สำหรับตะกร้า
     private PricingService pricingService = new PricingService();
-    public Jflame_dashboard_order(mainframe mainframe){
-        this.mainframe=mainframe;
+    public Jflame_dashboard_order(){
         setTitle("Point of Sale");
         setSize(1000, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -60,20 +58,17 @@ public class Jflame_dashboard_order extends JFrame {
         
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
-        JMenuItem exitItem = new JMenuItem("Go to Dashboard");
+        JMenuItem dashboardItem = new JMenuItem("Go to Dashboard");
         JMenuItem inventoryItem = new JMenuItem("Go to Inventory");
-        exitItem.addActionListener(e -> {
-             if (mainframe != null) mainframe.setVisible(true);
+        dashboardItem.addActionListener(e -> {
+            new dashboard();
             dispose();
         });
         inventoryItem.addActionListener(e -> {
-            if (mainframe != null) {
-        mainframe.showcard("inventory");
-        mainframe.setVisible(true);
-    }
+            new inventory();
             dispose();
         });
-        fileMenu.add(exitItem);
+        fileMenu.add(dashboardItem);
         fileMenu.add(inventoryItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
