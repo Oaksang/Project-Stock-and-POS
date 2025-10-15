@@ -38,7 +38,7 @@ public class Jflame_dashboard_order extends JFrame {
         setSize(1000, 750);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // จัดให้อยู่กึ่งกลางหน้าจอ
-        setIconImage(new ImageIcon("MRDRY_logo.png").getImage());
+        setIconImage(new ImageIcon("./picture/MRDRY_logo.png").getImage());
         
 
         // ใช้ Look and Feel ของระบบปฏิบัติการเพื่อให้ดูเป็นธรรมชาติ
