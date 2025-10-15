@@ -43,6 +43,7 @@ public class stockLow extends JFrame implements ActionListener{
         initialProducts= csvReader.readProductsFromCSV();
 
        this.inventoryService = new MemmoryInventoryService(initialProducts);
+        setIconImage(new ImageIcon("./picture/mr_DRY_logo_ver2.png").getImage());
        Initial();
        setComponent();
        Finally();
@@ -259,4 +260,5 @@ public class stockLow extends JFrame implements ActionListener{
     }
       
 }
+
   
