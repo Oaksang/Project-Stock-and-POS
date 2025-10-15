@@ -13,10 +13,15 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-public class inventory extends JPanel implements ActionListener{
-    mainframe mainframe;
-    CardLayout card;
-    JPanel mainPanel;
+
+/*
+ * หน้าต่างจัดการสินค้า ที่จะโชว์ตารางสินค้าทั้งหมด
+ * สามารถเพิ่ม ลบ ค้นหา และจัดเรียงสินค้าได้
+ * เชื่อมต่อกับ MemmoryInventoryService เพื่อจัดการข้อมูลสินค้า
+ * @param inventoryService - บริการจัดการสินค้าทั้งหมด
+ */
+public class inventory extends JFrame implements ActionListener{
+    Container cp;
     JTextField search;
     JRadioButton sortstock,sortprice;
     JTable productTable;
@@ -25,7 +30,7 @@ public class inventory extends JPanel implements ActionListener{
     JButton add,remove;
     JComboBox add_product,search_product;
     JButton home,ham;
-    JPanel p_top;
+    JPanel p,p_top;
     JButton inventory,Pos,logout;
     JTextField sku,quantity,name,price;
     JButton search_button;
@@ -35,25 +40,29 @@ public class inventory extends JPanel implements ActionListener{
     ImageIcon home_pic=new ImageIcon("./picture/home.png");
     ImageIcon ham_pic=new ImageIcon("./picture/hamburger.png");
     ImageIcon out_pic=new ImageIcon("./picture/logout.png");
-    public inventory(mainframe mainframe){
-        this.mainframe=mainframe;
+
+    public inventory(){
+       super("MR.DRY");
+       // โหลดสินค้าทั้งหมดจาก CSV
        ProductCSVReader csvReader = new ProductCSVReader();
        List<Product> initialProducts = csvReader.readProductsFromCSV();
        check_searchTosort=null;
+       // สร้าง InventoryService โดยใช้สินค้าที่โหลดมา
        this.inventoryService = new MemmoryInventoryService(initialProducts);
        Initial();
        setComponent();
+       Finally();
+
        loadProductData(); 
     }
 
     public void Initial(){
-    setLayout(null);
-    setBackground(new Color(216,191,216));
-    setSize(550,650);
+    cp=getContentPane();
+    cp.setLayout(null);
+    cp.setBackground(new Color(216,191,216));
     }
 
     public void setComponent(){
-
     // ค้นหาสินค้า
     search=new JTextField("search product");
     search.setFont(new Font("Garamond",Font.BOLD, 16));
@@ -73,7 +82,6 @@ public class inventory extends JPanel implements ActionListener{
     sortprice.setFont(new Font("Garamond",Font.BOLD, 18));
     sortprice.setBounds(15, 40, 200, 30);
     sortprice.setBackground(new Color(216,191,216));
-
     sortstock=new JRadioButton("sort by out stock",false);
     sortstock.setForeground(new Color(250,248,228));
     sortstock.setFont(new Font("Garamond",Font.BOLD, 18));
@@ -106,7 +114,7 @@ public class inventory extends JPanel implements ActionListener{
         tableScrollPane.setBounds(65, 70, 400, 400);
         
         // 3. เพิ่ม JScrollPane (ซึ่งมี JTable อยู่ข้างใน) เข้าสู่ Container
-        add(tableScrollPane);
+        cp.add(tableScrollPane);
     // ปุ่มเพิ่มสินค้า
     add=new JButton("Add");
     add.setForeground(new Color(216,191,216));
@@ -158,6 +166,10 @@ public class inventory extends JPanel implements ActionListener{
    p_top.setLayout(null);
    p_top.setBackground(new Color(250,248,228));
    p_top.setBounds(0,0,200,650);
+   p=new JPanel();
+   p.setLayout(null);
+   p.setBackground(new Color(0,0,0,0));
+   p.setBounds(0, 0, 200,650);
    inventory=new JButton("Inventory");
    inventory.setBackground(new Color(250,248,228));
    inventory.setBorderPainted(false);
@@ -187,16 +199,16 @@ public class inventory extends JPanel implements ActionListener{
    p_top.add(logout);
    p_top.add(inventory);
    p_top.add(Pos);
-    add(home);
-    add(ham);
-    add(add_product);
-    add(remove);
-    add(add);
-    add(sortstock);
-    add(sortprice);
-    add(search);
-    add(search_button);
-    add(search_product);
+    cp.add(home);
+    cp.add(ham);
+    cp.add(add_product);
+    cp.add(remove);
+    cp.add(add);
+    cp.add(sortstock);
+    cp.add(sortprice);
+    cp.add(search);
+    cp.add(search_button);
+    cp.add(search_product);
     ham.addActionListener(this);
     home.addActionListener(this);
     inventory.addActionListener(this);
@@ -209,35 +221,50 @@ public class inventory extends JPanel implements ActionListener{
     search_button.addActionListener(this);
     search_product.addActionListener(this);
     search.addActionListener(this);
+    p.add(p_top);
+    this.setGlassPane(p);
+    p.setVisible(false);
+    p.setOpaque(false);
     }
+    public void Finally(){
+    this.setSize(550,650);
+    this.setVisible(true);
+    this.setLocationRelativeTo(null);
+    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+ }
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==ham){
         if (!check_p) {
-                remove(home);
-                remove(ham);
+                cp.remove(home);
+                cp.remove(ham);
                 home.setBounds(160, 0, 20, 20);
                 ham.setBounds(180, 0, 20, 20);
                 home.setBackground(new Color(250, 248, 228));
                 ham.setBackground(new Color(250, 248, 228));
                 p_top.add(home);
                 p_top.add(ham);
-                mainframe.showside(p_top);
+                p.setVisible(true);
+                //cp.add(p_top);
                 check_p = true;
             } else {
                 home.setBounds(0, 0, 20, 20);
                 ham.setBounds(21, 0, 20, 20);
                 home.setBackground(new Color(216, 191, 216));
                 ham.setBackground(new Color(216, 191, 216));
-                add(home);
-                add(ham);
-                mainframe.hideside();
+                cp.add(home);
+                cp.add(ham);
+                p.setVisible(false);
                 check_p = false;
             }
+            cp.revalidate();
+            cp.repaint();
         }else if(e.getSource()==home){
-                mainframe.showcard("dashboard");
+                new dashboard();
+                dispose();
         }else if(e.getSource()==add){
             String select=(String)add_product.getSelectedItem();
+            // เพิ่มสินค้าแบบไหน
             if(select.equals("add new product")){ 
                 new add2_inventory(this.inventoryService, this); 
             }else if(select.equals("add quantity product")){ 
@@ -245,24 +272,28 @@ public class inventory extends JPanel implements ActionListener{
             }
         }else if(e.getSource()==remove){
             new remove_inventory(this.inventoryService, this); 
+
         }else if(e.getSource()==inventory){
             if (check_p) {
                 home.setBounds(0, 0, 20, 20);
                 ham.setBounds(21, 0, 20, 20);
                 home.setBackground(new Color(216, 191, 216));
                 ham.setBackground(new Color(216, 191, 216));
-            add(home);
-            add(ham);
-                mainframe.hideside();
+                cp.add(home);
+                cp.add(ham);
+                p.setVisible(false);
                 check_p = false;
             }
+            cp.revalidate();
+            cp.repaint();
         } else if(e.getSource()==logout){
             new loginpanel();
-            mainframe.dispose();
+            dispose();
         } else if(e.getSource()==Pos){
-            mainframe.setVisible(false);
-           new Jflame_dashboard_order(mainframe);
-        }else if(sortprice.isSelected()){
+            new Jflame_dashboard_order();
+            dispose();
+        } // จัดเรียงสินค้า
+        else if(sortprice.isSelected()){
            String select=(String)search_product.getSelectedItem();
            if(check_searchTosort==null)
            this.Show_new(this.sortProductData(true,inventoryService.getAll()));
@@ -277,6 +308,7 @@ public class inventory extends JPanel implements ActionListener{
             this.Show_new(this.searchProductData(select,search.getText()));
         }
     }
+    // แสดงข้อมูลสินค้าใหม่ในตาราง
     public void Show_new(List<Product> products){
         tableModel.setRowCount(0);
         for (Product product : products) {
@@ -288,6 +320,9 @@ public class inventory extends JPanel implements ActionListener{
             tableModel.addRow(row);
         }
     }
+
+    // โหลดข้อมูลสินค้าและแสดงในตาราง
+    // เรียกใช้เมธอดนี้เมื่อมีการเพิ่ม ลบ หรือแก้ไขสินค้า
     public void loadProductData() {
         // ล้างข้อมูลเก่าทั้งหมดในตาราง
         tableModel.setRowCount(0);
@@ -305,6 +340,9 @@ public class inventory extends JPanel implements ActionListener{
             tableModel.addRow(row);
         }
     }
+    // จัดเรียงหรือค้นหาสินค้าแล้วแสดงผล
+    // ถ้า sort เป็น true จะจัดเรียงตามราคา
+    // ถ้า sort เป็น false จะจัดเรียงตามสต็อกที่น้อยที่สุด
     public List<Product> sortProductData(boolean sort,List<Product> select) {
         tableModel.setRowCount(0);
         List<Product> products;
@@ -313,6 +351,10 @@ public class inventory extends JPanel implements ActionListener{
         else products=inventoryService.sortByStock(true,select);
         return products;
     }
+    // ค้นหาสินค้า
+    // ถ้าไม่ค้นหาให้ส่ง null มา
+    // ถ้าค้นหาแล้วให้ส่งรายชื่อที่ค้นหาได้มา
+    // ถ้าไม่เจอสินค้าให้ส่งค่าว่างมา
     public List<Product> searchProductData(String s,String search) {
         List <Product> products=new ArrayList<>();
         if("search by Name".equalsIgnoreCase(s)){
@@ -327,6 +369,5 @@ public class inventory extends JPanel implements ActionListener{
     check_searchTosort=products;
     return check_searchTosort;
 }
-
 }
   

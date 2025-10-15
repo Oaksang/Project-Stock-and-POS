@@ -8,10 +8,19 @@ import Services.InventoryService;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;;
+import java.awt.event.ActionListener;
+
+/*
+ * class เพิ่มสินค้าในคลังโดยเพิ่มสินค้าในคลังที่มีอยู่แล้ว
+ * โดยรับ SKU และจำนวนที่ต้องการเพิ่ม
+ * เมื่อเพิ่มแล้วจะบันทึกข้อมูลลงในไฟล์ CSV ทันที
+ * ถ้า SKU ไม่ถูกต้องหรือไม่พบในคลัง จะมีการแจ้งเตือนข้อผิดพลาด
+ * ถ้าจำนวนที่เพิ่มไม่ถูกต้อง (เช่น เป็นลบหรือไม่ใช่จำนวนเต็ม) จะมีการแจ้งเตือนข้อผิดพลาด
+ * ถ้าเพิ่มสำเร็จ จะแจ้งเตือนว่าการเพิ่มสำเร็จและบันทึกลง CSV แล้ว
+ */
 public class add_inventory extends JFrame implements ActionListener{
    Container cp;
-   JButton add;
+   JButton home,add;
    JTextField sku,quantity;
    JLabel sku_t,quantity_t;
    private final InventoryService inventoryService;
@@ -31,6 +40,12 @@ public class add_inventory extends JFrame implements ActionListener{
    cp.setBackground(new Color(216,191,216));
    }
    public void setComponent(){
+   home=new JButton();
+   home.setIcon(home_pic);
+   home.setBackground(new Color(216,191,216));
+   home.setSize(20, 20);
+   home.setBorderPainted(false);
+   home.setBounds(0,0,20,20);
    sku=new JTextField();
    sku.setBounds(50,50,200,25);
    sku_t=new JLabel("SKU");
@@ -55,8 +70,10 @@ public class add_inventory extends JFrame implements ActionListener{
    cp.add(quantity_t);
    cp.add(sku_t);
    cp.add(sku);
+   cp.add(home);
    cp.add(quantity);
    cp.add(add);
+   home.addActionListener(this);
    add.addActionListener(this);
 
    }
@@ -73,6 +90,7 @@ public class add_inventory extends JFrame implements ActionListener{
             String qtyInput = quantity.getText().trim();
 
             try {
+               // ตรวจสอบว่าค่าที่เพิ่มไม่เป็นค่าว่าง
                if (skuInput.isEmpty() || qtyInput.isEmpty()) {
                   JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
                   return;
@@ -102,6 +120,9 @@ public class add_inventory extends JFrame implements ActionListener{
             } catch (InvalidOperationException ex) {
                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Operation Error", JOptionPane.ERROR_MESSAGE);
             }
+      }else if(e.getSource()==home){
+      new dashboard();
+      dispose();
    }
    }
 }

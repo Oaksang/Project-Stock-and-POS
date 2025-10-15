@@ -1,11 +1,17 @@
 package DataModels;
 
-
+/**
+ * class ที่ใช้เก็บข้อมูลสินค้าที่อยู่ในการสั่งซื้อ เป็นส่วนหนึ่งของ Order
+ * หน้าที่ของคลาสนี้คือการเก็บข้อมูลสินค้า เช่น สินค้า, จำนวนสินค้า, ราคาสินค้า
+ * @param product สินค้า , quantity จำนวนสินค้า , price ราคาสินค้า
+ * @return สินค้า, จำนวนสินค้า, ราคาสินค้า
+ */
 public class OrderItem {
     private Product product;
     private int quantity;
     private double price;
 
+    // Constructor
     public OrderItem(Product product, int quantity, double price) {
         if (product == null) 
         throw new RuntimeException("product is unknown");
@@ -16,7 +22,7 @@ public class OrderItem {
         this.price = price;
     }
 
-    // Getters
+    // Methods รับค่าต่างๆ
     public Product getProduct() {
         return product;
     }
@@ -31,15 +37,5 @@ public class OrderItem {
 
     public double getTotal() {
         return product.price() * quantity;
-    }
-
-    // Test OrderItem
-    public static void main(String[] args) {
-        Product product = new Product("P001", "Laptop", 1200, 50);
-        OrderItem orderItem = new OrderItem(product, 5, product.price());
-        System.out.println("Product: " + orderItem.getProduct().name());
-        System.out.println("Quantity: " + orderItem.getQuantity());
-        System.out.println("Price: " + orderItem.getPrice());
-        System.out.println("Total: " + orderItem.getTotal());
     }
 }

@@ -92,7 +92,7 @@ public class MemmoryInventoryService implements InventoryService{
     public boolean CheckSku(String sku) {
         return indexOfSku(sku) >= 0;
     }
-     @Override
+     @Override // ค้นหาสินค้าตามคำใน SKU (ไม่สนตัวพิมพ์)
     public List<Product> searchBySku(String sku) {
         String skuword;
 
@@ -118,7 +118,7 @@ public class MemmoryInventoryService implements InventoryService{
         return resultList;
     }
 
-    @Override
+    @Override // ค้นหาสินค้าตามคำในชื่อ (ไม่สนตัวพิมพ์)
     public List<Product> searchByName(String nameword) {
     String namewordlow;
 
@@ -144,7 +144,7 @@ public class MemmoryInventoryService implements InventoryService{
 }
     
 
-    @Override
+    @Override // เพิ่มสินค้าใหม่
     public void addProduct(Product product) {
         if (CheckSku(product.sku())) {
             throw new RuntimeException("SKU already exists: " + product.sku());
@@ -154,7 +154,7 @@ public class MemmoryInventoryService implements InventoryService{
         csvWriter.writeAllProductsToCSV(productList);
     }
 
-    @Override
+    @Override // ลบสินค้าตาม SKU
     public void removeBySku(String sku) throws ProductNotFoundException {
         
         int index = indexOfSku(sku);
@@ -167,10 +167,9 @@ public class MemmoryInventoryService implements InventoryService{
         csvWriter.writeAllProductsToCSV(productList);
 }
 
-@Override
+@Override // กำหนดจำนวนสินค้าในคลังใหม่
     public void setStock(String sku, int newStock)
             throws ProductNotFoundException, InvalidOperationException {
-        // ... (Existing logic to find product, set stock) ...
         int index = indexOfSku(sku);
         if (index < 0) {
             throw new ProductNotFoundException("SKU not found: " + sku);
@@ -187,7 +186,7 @@ public class MemmoryInventoryService implements InventoryService{
         csvWriter.writeAllProductsToCSV(productList);
     }
 
-  @Override
+  @Override // เพิ่มจำนวนสินค้าในคลัง
     public void increase(String sku, int qty)
             throws ProductNotFoundException, InvalidOperationException {
         if (qty <= 0) {
@@ -208,7 +207,7 @@ public class MemmoryInventoryService implements InventoryService{
         csvWriter.writeAllProductsToCSV(productList);
     }
 
-    @Override
+    @Override // ลดจำนวนสินค้าในคลัง
     public void decrease(String sku, int qty)
         throws ProductNotFoundException, InvalidOperationException {
         if (qty <= 0) {

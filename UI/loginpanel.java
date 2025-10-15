@@ -4,7 +4,6 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class loginpanel extends JFrame implements ActionListener{
-    private mainframe mainframe;
     private JTextField txtUser;
     private JPasswordField txtPassword;
     private JButton btnLogin;
@@ -144,7 +143,7 @@ public class loginpanel extends JFrame implements ActionListener{
         JOptionPane.showMessageDialog(this, "Login successful!",
                 "Success", JOptionPane.INFORMATION_MESSAGE);
         SwingUtilities.invokeLater(() -> {
-            new mainframe();  // เปิดหน้าใหม่
+            new dashboard();  // เปิดหน้าใหม่
         });
         dispose();            // ปิด login หลังเปิดหน้าใหม่
     } else {
@@ -163,4 +162,3 @@ public class loginpanel extends JFrame implements ActionListener{
     
     
 }
-

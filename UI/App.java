@@ -15,7 +15,7 @@ public class App {
         panel = new loginpanel();
         frame.setContentPane(panel);
         
-        frame.setSize(400, 400); 
+        frame.setSize(400, 400);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

@@ -6,6 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * class ที่ใช้ในการอ่านข้อมูลสินค้าจากไฟล์ CSV
+ * หน้าที่ของคลาสนี้คือการเปิดไฟล์ CSV ที่เก็บข้อมูลสินค้า
+ * อ่านข้อมูลจากไฟล์ และแปลงข้อมูลเป็นรูปแบบที่สามารถนำไปใช้ในโปรแกรมได้
+ * @param ไม่มี
+ * @return ข้อมูลสินค้าในรูปแบบ List ของ Product
+ */
 public class ProductCSVReader {
 
     private static final String CSV_FILE = "./FileCSV/products.csv";
@@ -32,7 +39,7 @@ public class ProductCSVReader {
                 // ตรวจสอบว่ามีข้อมูลครบ 4 คอลัมน์หรือไม่ (SKU, Name, Price, Stock)
                 if (data.length == 4) {
                     try {
-                        String sku = data[0].trim();
+                        String sku = data[0].trim(); // .trim() เพื่อลบช่องว่างรอบๆ
                         String name = data[1].trim();
                         // แปลง String เป็น double และ int ตามลำดับ
                         double price = Double.parseDouble(data[2].trim());
@@ -52,11 +59,6 @@ public class ProductCSVReader {
             // หากไฟล์ไม่มีอยู่จริง ให้คืนค่ารายการว่าง
         }
         return products;
-    }
-
-    public List<String[]> readSaleFromCSV() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'readSaleFromCSV'");
     }
 
 }
